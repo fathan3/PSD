@@ -1037,7 +1037,7 @@ df.head(10)
 
 Setelah dataset berhasil digabungkan menjadi satu file `Data_Polutan_Kota-Sukabumi.csv`, langkah selanjutnya adalah memvisualisasikan data deret waktu (*time series*) dari masing-masing parameter polutan. Visualisasi ini bertujuan untuk memberikan gambaran umum mengenai tren konsentrasi polutan dari waktu ke waktu serta membantu mengidentifikasi pola atau anomali yang mungkin terjadi.
 
-'''python
+```python
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -1060,7 +1060,7 @@ for i, column in enumerate(pollutants):
 plt.xlabel('Tanggal')
 plt.tight_layout()
 plt.show()
-'''
+```
 ![png](Data_Understanding_files/grafik-timeseries.png)
 
 
