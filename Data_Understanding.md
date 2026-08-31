@@ -1033,5 +1033,35 @@ df.head(10)
 | 9 | 2026-04-13 | NaN | NaN | 0.114589 | NaN |
 
 
+## 9. Visualisasi Time Series Polutan
+
+Setelah dataset berhasil digabungkan menjadi satu file `Data_Polutan_Kota-Sukabumi.csv`, langkah selanjutnya adalah memvisualisasikan data deret waktu (*time series*) dari masing-masing parameter polutan. Visualisasi ini bertujuan untuk memberikan gambaran umum mengenai tren konsentrasi polutan dari waktu ke waktu serta membantu mengidentifikasi pola atau anomali yang mungkin terjadi.
+
+'''python
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Membaca data yang sudah digabungkan
+df_merged = pd.read_csv("Data_Polutan_Kota-Sukabumi.csv")
+df_merged['date'] = pd.to_datetime(df_merged['date'])
+df_merged = df_merged.sort_values('date')
+
+# Setup plot
+fig, axes = plt.subplots(4, 1, figsize=(15, 20), sharex=True)
+pollutants = ['NO2', 'SO2', 'O3', 'CO']
+colors = ['blue', 'green', 'orange', 'red']
+
+for i, column in enumerate(pollutants):
+    sns.lineplot(ax=axes[i], x='date', y=column, data=df_merged, color=colors[i], marker='o', markersize=4)
+    axes[i].set_title(f'Tren Harian {column}', fontsize=14)
+    axes[i].set_ylabel('Konsentrasi')
+    axes[i].grid(True, linestyle='--', alpha=0.6)
+
+plt.xlabel('Tanggal')
+plt.tight_layout()
+plt.show()
+'''
+![png](Data_Understanding_files/grafik-timeseries.png)
+
 
 
