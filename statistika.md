@@ -174,9 +174,11 @@ Diketahui:
 - $\bar{x}$ (rata-rata $O_3$) $\approx 0.11548$
 
 $$
+\begin{aligned}
 s &= \sqrt{\frac{\sum_{i=1}^{349} (x_i - 0.11548)^2}{349-1}}\\
 \\
 s &\approx 0.00296
+\end{aligned}
 $$
 
 2. **Variansi**
@@ -184,9 +186,11 @@ $$
 Variansi dapat dihitung secara langsung dengan mengkuadratkan Standar Deviasi ($s$).
 
 $$
+\begin{aligned}
 v &= s^2\\
 v &= 0.00296^2\\
 v &\approx 0.000008748 \ (8.748 \times 10^{-6})
+\end{aligned}
 $$
 
 3. **Skewness**
@@ -195,17 +199,21 @@ $$ Skewness = \frac{n}{(n-1)(n-2)} \sum_{i=1}^{n} \left(\frac{x_i - \bar{x}}{s}\
 
 Rumus ini dikomposisikan dalam dua blok konstanta dan penjumlahan momen:
 
-$$ 
+$$
+\begin{aligned}
 A &= \frac{n}{(n-1)(n-2)} = \frac{349}{(348)(347)} = \frac{349}{120756} \approx 0.002890\\
 \\
 B &= \sum_{i=1}^{349}\left(\frac{x_i-0.11548}{0.00296}\right)^3
+\end{aligned}
 $$
 
 Berdasarkan data aktual, nilai penyimpangan dipangkat tiga ($B$) adalah $100.54$:
 
 $$
+\begin{aligned}
 Skewness &= A \times B\\
 Skewness &= 0.002890 \times 100.54 \approx 0.2906
+\end{aligned}
 $$
 *(Menandakan asimetri positif).*
 
@@ -214,9 +222,11 @@ $$
 Jumlah kumulatif dari 349 nilai pengamatan valid Ozon selama setahun pemantauan.
 
 $$
+\begin{aligned}
 OS &= \sum_{i=1}^{n}x_i \\
 OS &= 0.113990 + 0.118087 + 0.116691 + \dots + x_{349} \\
 OS &\approx 40.304
+\end{aligned}
 $$
 
 ---
@@ -231,30 +241,40 @@ Diketahui:
 - $\bar{x}$ (rata-rata $CO$) $\approx 0.02915$
 
 $$
+\begin{aligned}
 s &= \sqrt{\frac{\sum_{i=1}^{198} (x_i - 0.02915)^2}{198-1}}\\
 s &\approx 0.00406
+\end{aligned}
 $$
 
 2. **Variansi**
 $$
+\begin{aligned}
 v &= s^2\\
 v &= 0.00406^2\\
 v &\approx 0.0000165 \ (1.65 \times 10^{-5})
+\end{aligned}
 $$
 
 3. **Skewness**
-$$ 
+$$
+\begin{aligned}
 A &= \frac{198}{(198-1)(198-2)} = \frac{198}{38612} \approx 0.005128\\
 B &= \sum_{i=1}^{198}\left(\frac{x_i-0.02915}{0.00406}\right)^3
+\end{aligned}
 $$
 Berdasarkan data aktual, nilai simpangan kumulatif ($B$) adalah $31.015$, maka:
 $$
+\begin{aligned}
 Skewness &= 0.005128 \times 31.015 \approx 0.1590
+\end{aligned}
 $$
 
 4. **Overall Sum**
 $$
+\begin{aligned}
 OS &= \sum_{i=1}^{198}x_i \approx 5.772
+\end{aligned}
 $$
 
 ---
@@ -269,29 +289,39 @@ Diketahui:
 - $\bar{x}$ (rata-rata $SO_2$) $\approx 0.0000195$
 
 $$
+\begin{aligned}
 s &= \sqrt{\frac{\sum_{i=1}^{119} (x_i - 0.0000195)^2}{119-1}}\\
 s &\approx 0.000220
+\end{aligned}
 $$
 
 2. **Variansi**
 $$
+\begin{aligned}
 v &= 0.000220^2\\
 v &\approx 0.0000000482 \ (4.82 \times 10^{-8})
+\end{aligned}
 $$
 
 3. **Skewness**
-$$ 
+$$
+\begin{aligned}
 A &= \frac{119}{(119-1)(119-2)} = \frac{119}{13806} \approx 0.008620\\
 B &= \sum_{i=1}^{119}\left(\frac{x_i - 0.0000195}{0.000220}\right)^3
+\end{aligned}
 $$
 Berdasarkan data aktual, $B = 3.197$:
 $$
+\begin{aligned}
 Skewness &= 0.008620 \times 3.197 \approx 0.02756
+\end{aligned}
 $$
 
 4. **Overall Sum**
 $$
+\begin{aligned}
 OS &= \sum_{i=1}^{119}x_i \approx 0.002320
+\end{aligned}
 $$
 
 ---
@@ -306,27 +336,37 @@ Diketahui:
 - $\bar{x}$ (rata-rata $NO_2$) $\approx 0.00003447$
 
 $$
+\begin{aligned}
 s &= \sqrt{\frac{\sum_{i=1}^{62} (x_i - 0.00003447)^2}{62-1}}\\
 s &\approx 0.00001632
+\end{aligned}
 $$
 
 2. **Variansi**
 $$
+\begin{aligned}
 v &= 0.00001632^2\\
 v &\approx 0.0000000002664 \ (2.664 \times 10^{-10})
+\end{aligned}
 $$
 
 3. **Skewness**
-$$ 
+$$
+\begin{aligned}
 A &= \frac{62}{(62-1)(62-2)} = \frac{62}{3660} \approx 0.01694\\
 B &= \sum_{i=1}^{62}\left(\frac{x_i - 0.00003447}{0.00001632}\right)^3
+\end{aligned}
 $$
 Berdasarkan data aktual, nilai simpangan kumulatif ($B$) adalah $B = -6.096$:
 $$
+\begin{aligned}
 Skewness &= 0.01694 \times -6.096 \approx -0.1033
+\end{aligned}
 $$
 
 4. **Overall Sum**
 $$
+\begin{aligned}
 OS &= \sum_{i=1}^{62}x_i \approx 0.002137
+\end{aligned}
 $$
