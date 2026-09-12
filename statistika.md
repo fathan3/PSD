@@ -70,14 +70,14 @@ Sebelum melakukan koneksi melalui *client* mana pun, kita membutuhkan rincian kr
 1. Masuk ke *dashboard* atau console utama **Aiven**, kemudian pilih proyek Anda.
 2. Beralih ke tab **Overview** pada layanan PostgreSQL yang sedang aktif berjalan.
 3. Pada segmen **Connection information**, perhatikan dan salin beberapa parameter krusial berikut:
-   * **Host:** `[Ganti dengan Host Aiven Anda]`
-   * **Port:** `[Ganti dengan Port Anda]`
-   * **User:** `[Ganti dengan Username Anda]`
+   * **Host:** `psd-fathanra311-a6ce.b.aivencloud.com`
+   * **Port:** `17845`
+   * **User:** `avnadmin`
    * **Password:** (Klik ikon *copy* atau visibilitas untuk menyalin kata sandi)
    * **SSL mode:** `require`
 4. Apabila aplikasi *client* membutuhkan, pastikan Anda juga mengunduh *CA certificate* (Sertifikat SSL) yang tersedia.
 
-![Aiven PostgreSQL Console]([Masukkan Path Foto Aiven Anda])
+![png](statistik_files/aiven.png)
 
 ---
 
@@ -85,7 +85,7 @@ Sebelum melakukan koneksi melalui *client* mana pun, kita membutuhkan rincian kr
 
 Aplikasi pgAdmin 4 difungsikan untuk memverifikasi tabel dan data secara langsung sebelum dipindahkan ke alat analitik.
 1. Jalankan **pgAdmin 4**. Di panel kiri (Browser), klik kanan pada bagian **Servers** > **Register** > **Server...**
-2. Di tab **General**, tuliskan nama koneksi sesuai keinginan Anda (misal: `Database Polutan Sukabumi`).
+2. Di tab **General**, tuliskan nama koneksi sesuai keinginan Anda (misal: `Polutan`).
 3. Berpindah ke tab **Connection**, lengkapi form sesuai dengan data dari Langkah 1:
    * **Host name/address:** Tempelkan *Host* dari Aiven.
    * **Port:** Masukkan *Port* yang sesuai.
@@ -94,19 +94,19 @@ Aplikasi pgAdmin 4 difungsikan untuk memverifikasi tabel dan data secara langsun
    * **Password:** Tempelkan kata sandi, lalu centang **Save password?** agar tidak perlu mengetik ulang nanti.
 4. Klik tombol **Save** untuk memulai koneksi ke server *cloud*.
 
-![Konfigurasi Session Manager pgAdmin]([Masukkan Path Foto pgAdmin Anda])
+![png](statistik_files/pgadmin-connect.png)
 
 ---
 
 ## Langkah 3: Memeriksa Ketersediaan Data di pgAdmin 4
 
 Setelah terkoneksi, langkah selanjutnya adalah meninjau data mentah untuk memastikan strukturnya sudah benar.
-1. Melalui panel kiri pgAdmin, rentangkan *tree* menu server Anda menuju Databases > `[Nama Database Anda]` > Schemas > `public` > Tables > `[Nama Tabel Anda]`.
+1. Melalui panel kiri pgAdmin, rentangkan *tree* menu server Anda menuju Databases > `polutan` > Schemas > `public` > Tables > `kualitasudara`.
 2. Klik kanan pada tabel tersebut, lalu navigasikan ke **View/Edit Data** > **All Rows**.
 3. Pastikan kolom-kolom penting seperti waktu pengamatan (`date`) dan nilai polutan (`no2`, `co`, `so2`, `o3`) muncul dengan benar.
 4. Pada peninjauan ini, sel data yang bernilai `[null]` adalah hal yang sangat wajar. Nilai ini nantinya akan ditangani sebagai *missing values*.
 
-![Tampilan Data Polutan di pgAdmin]([Masukkan Path Foto Data pgAdmin Anda])
+![png](statistik_files/pgadmin-view.png)
 
 ---
 
@@ -125,7 +125,7 @@ Sekarang kita beralih ke KNIME untuk mengambil data dari database dan menghitung
    * Klik ganda **DB Table Selector**, lalu arahkan untuk memilih skema `public` dan tabel polutan Anda.
 5. Klik kanan pada node **DB Reader** dan pilih **Execute**. Lampu indikator hijau akan menyala jika data berhasil dimuat.
 
-![Alur Kerja Database dan Statistik di KNIME]([Masukkan Path Foto Node KNIME Anda])
+![png](statistik_files/knime1.png)
 
 ---
 
@@ -141,7 +141,7 @@ Tahap pungkasan adalah menjalankan mesin analitik statistik di dalam KNIME.
    * **No. missings:** Jumlah rekaman sensor yang bolong/gagal terekam.
    * **Histogram:** Grafik sederhana dari penyebaran nilainya.
 
-![Tabel Hasil Output Node Statistics]([Masukkan Path Foto Output Statistik KNIME Anda])
+![png](statistik_files/knime2.png)
 
 ## 3. Penjelasan Distribusi Polutan Kota Sukabumi
 
@@ -171,12 +171,12 @@ $$ s = \sqrt{\frac{\sum_{i=1}^{n} (x_i - \bar{x})^2}{n-1}} $$
 
 Diketahui:
 - $n$ adalah jumlah baris valid (karena terdapat 17 missing values dari total 366 hari, $n = 366 - 17 = 349$)
-- $\bar{x}$ (rata-rata $O_3$) diasumsikan $\approx 0.116$
+- $\bar{x}$ (rata-rata $O_3$) $\approx 0.11548$
 
 $$
-s &= \sqrt{\frac{\sum_{i=1}^{349} (x_i - 0.116)^2}{349-1}}\\
+s &= \sqrt{\frac{\sum_{i=1}^{349} (x_i - 0.11548)^2}{349-1}}\\
 \\
-s &\approx 0.0025
+s &\approx 0.00296
 $$
 
 2. **Variansi**
@@ -185,8 +185,8 @@ Variansi dapat dihitung secara langsung dengan mengkuadratkan Standar Deviasi ($
 
 $$
 v &= s^2\\
-v &= 0.0025^2\\
-v &= 0.00000625
+v &= 0.00296^2\\
+v &\approx 0.000008748 \ (8.748 \times 10^{-6})
 $$
 
 3. **Skewness**
@@ -196,18 +196,18 @@ $$ Skewness = \frac{n}{(n-1)(n-2)} \sum_{i=1}^{n} \left(\frac{x_i - \bar{x}}{s}\
 Rumus ini dikomposisikan dalam dua blok konstanta dan penjumlahan momen:
 
 $$ 
-A &= \frac{n}{(n-1)(n-2)} = \frac{349}{(348)(347)} = \frac{349}{120756} \approx 0.00289\\
+A &= \frac{n}{(n-1)(n-2)} = \frac{349}{(348)(347)} = \frac{349}{120756} \approx 0.002890\\
 \\
-B &= \sum_{i=1}^{349}\left(\frac{x_i-0.116}{0.0025}\right)^3
+B &= \sum_{i=1}^{349}\left(\frac{x_i-0.11548}{0.00296}\right)^3
 $$
 
-Jika nilai total penyimpangan dipangkat tiga ($B$) menghasilkan misal 153.2:
+Berdasarkan data aktual, nilai penyimpangan dipangkat tiga ($B$) adalah $100.54$:
 
 $$
 Skewness &= A \times B\\
-Skewness &= 0.00289 \times 153.2 \approx 0.442
+Skewness &= 0.002890 \times 100.54 \approx 0.2906
 $$
-*(Menandakan asimetri positif lemah).*
+*(Menandakan asimetri positif).*
 
 4. **Overall Sum**
 
@@ -215,6 +215,118 @@ Jumlah kumulatif dari 349 nilai pengamatan valid Ozon selama setahun pemantauan.
 
 $$
 OS &= \sum_{i=1}^{n}x_i \\
-OS &= 0.115637 + 0.113963 + 0.118218 + \dots + x_{349} \\
-OS &\approx 40.484
+OS &= 0.113990 + 0.118087 + 0.116691 + \dots + x_{349} \\
+OS &\approx 40.304
+$$
+
+---
+
+### Perhitungan Manual Karbon Monoksida (CO)
+
+Langkah serupa dapat diaplikasikan pada Karbon Monoksida. Berikut adalah penjabaran perhitungannya dengan menyesuaikan jumlah sampel data CO.
+
+1. **Standar Deviasi**
+Diketahui:
+- $n = 366 - 168 = 198$ data valid (168 *missing values*)
+- $\bar{x}$ (rata-rata $CO$) $\approx 0.02915$
+
+$$
+s &= \sqrt{\frac{\sum_{i=1}^{198} (x_i - 0.02915)^2}{198-1}}\\
+s &\approx 0.00406
+$$
+
+2. **Variansi**
+$$
+v &= s^2\\
+v &= 0.00406^2\\
+v &\approx 0.0000165 \ (1.65 \times 10^{-5})
+$$
+
+3. **Skewness**
+$$ 
+A &= \frac{198}{(198-1)(198-2)} = \frac{198}{38612} \approx 0.005128\\
+B &= \sum_{i=1}^{198}\left(\frac{x_i-0.02915}{0.00406}\right)^3
+$$
+Berdasarkan data aktual, nilai simpangan kumulatif ($B$) adalah $31.015$, maka:
+$$
+Skewness &= 0.005128 \times 31.015 \approx 0.1590
+$$
+
+4. **Overall Sum**
+$$
+OS &= \sum_{i=1}^{198}x_i \approx 5.772
+$$
+
+---
+
+### Perhitungan Manual Sulfur Dioksida (SO2)
+
+Karena SO2 di Sukabumi memiliki tingkat observasi yang banyak hilang karena tertutup awan hujan, perhitungan disesuaikan dengan data tersisa.
+
+1. **Standar Deviasi**
+Diketahui:
+- $n = 366 - 247 = 119$ data valid (247 *missing values*)
+- $\bar{x}$ (rata-rata $SO_2$) $\approx 0.0000195$
+
+$$
+s &= \sqrt{\frac{\sum_{i=1}^{119} (x_i - 0.0000195)^2}{119-1}}\\
+s &\approx 0.000220
+$$
+
+2. **Variansi**
+$$
+v &= 0.000220^2\\
+v &\approx 0.0000000482 \ (4.82 \times 10^{-8})
+$$
+
+3. **Skewness**
+$$ 
+A &= \frac{119}{(119-1)(119-2)} = \frac{119}{13806} \approx 0.008620\\
+B &= \sum_{i=1}^{119}\left(\frac{x_i - 0.0000195}{0.000220}\right)^3
+$$
+Berdasarkan data aktual, $B = 3.197$:
+$$
+Skewness &= 0.008620 \times 3.197 \approx 0.02756
+$$
+
+4. **Overall Sum**
+$$
+OS &= \sum_{i=1}^{119}x_i \approx 0.002320
+$$
+
+---
+
+### Perhitungan Manual Nitrogen Dioksida (NO2)
+
+Gas NO2 menjadi parameter dengan jumlah data valid paling sedikit (paling banyak terhalang selama observasi tahunan).
+
+1. **Standar Deviasi**
+Diketahui:
+- $n = 366 - 304 = 62$ data valid (304 *missing values*)
+- $\bar{x}$ (rata-rata $NO_2$) $\approx 0.00003447$
+
+$$
+s &= \sqrt{\frac{\sum_{i=1}^{62} (x_i - 0.00003447)^2}{62-1}}\\
+s &\approx 0.00001632
+$$
+
+2. **Variansi**
+$$
+v &= 0.00001632^2\\
+v &\approx 0.0000000002664 \ (2.664 \times 10^{-10})
+$$
+
+3. **Skewness**
+$$ 
+A &= \frac{62}{(62-1)(62-2)} = \frac{62}{3660} \approx 0.01694\\
+B &= \sum_{i=1}^{62}\left(\frac{x_i - 0.00003447}{0.00001632}\right)^3
+$$
+Berdasarkan data aktual, nilai simpangan kumulatif ($B$) adalah $B = -6.096$:
+$$
+Skewness &= 0.01694 \times -6.096 \approx -0.1033
+$$
+
+4. **Overall Sum**
+$$
+OS &= \sum_{i=1}^{62}x_i \approx 0.002137
 $$
