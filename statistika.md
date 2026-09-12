@@ -60,48 +60,88 @@ Dalam akuisisi data satelit Sentinel-5P, metrik ini menjadi vital karena pantaua
 
 ---
 
-# **Implementasi Analisis Statistika Data Polutan Menggunakan Python**
+# **Implementasi Analisis Data Polutan: Integrasi Cloud Database ke KNIME**
 
-Berbeda dengan pendekatan berbasis *drag-and-drop*, proyek analisis kelayakan udara Kota Sukabumi ini sepenuhnya memanfaatkan ekosistem analitik berbasis **Python (Pandas)**. Python memberikan fleksibilitas komputasi langsung setelah data satelit berhasil diunduh.
+Bagian ini memaparkan langkah-langkah teknis untuk menghubungkan basis data PostgreSQL yang di-*hosting* pada platform cloud Aiven, mengecek ketersediaan data via pgAdmin 4, hingga melakukan ekstraksi perhitungan statistika deskriptif menggunakan perangkat lunak analitik visual KNIME Analytics Platform.
 
-Berikut adalah sintaks perhitungan statistik deskriptif untuk data yang sudah digabungkan menjadi `Data_Polutan_Kota-Sukabumi.csv`.
+## Langkah 1: Mendapatkan Kredensial Akses Database Aiven
 
-## 1. Menghitung Statistika Dasar dengan Pandas
+Sebelum melakukan koneksi melalui *client* mana pun, kita membutuhkan rincian kredensial server.
+1. Masuk ke *dashboard* atau console utama **Aiven**, kemudian pilih proyek Anda.
+2. Beralih ke tab **Overview** pada layanan PostgreSQL yang sedang aktif berjalan.
+3. Pada segmen **Connection information**, perhatikan dan salin beberapa parameter krusial berikut:
+   * **Host:** `[Ganti dengan Host Aiven Anda]`
+   * **Port:** `[Ganti dengan Port Anda]`
+   * **User:** `[Ganti dengan Username Anda]`
+   * **Password:** (Klik ikon *copy* atau visibilitas untuk menyalin kata sandi)
+   * **SSL mode:** `require`
+4. Apabila aplikasi *client* membutuhkan, pastikan Anda juga mengunduh *CA certificate* (Sertifikat SSL) yang tersedia.
 
-Library `pandas` memiliki fitur bawaan `.describe()` yang merangkum keseluruhan nilai Mean, Std, Min, Max, hingga kuartil secara instan.
+![Aiven PostgreSQL Console]([Masukkan Path Foto Aiven Anda])
 
-```python
-import pandas as pd
+---
 
-# Memuat dataset gabungan
-df = pd.read_csv("Data_Polutan_Kota-Sukabumi.csv")
+## Langkah 2: Menyiapkan Koneksi Server di pgAdmin 4
 
-# Pastikan kolom date menjadi index untuk time series
-df['date'] = pd.to_datetime(df['date'])
-df.set_index('date', inplace=True)
+Aplikasi pgAdmin 4 difungsikan untuk memverifikasi tabel dan data secara langsung sebelum dipindahkan ke alat analitik.
+1. Jalankan **pgAdmin 4**. Di panel kiri (Browser), klik kanan pada bagian **Servers** > **Register** > **Server...**
+2. Di tab **General**, tuliskan nama koneksi sesuai keinginan Anda (misal: `Database Polutan Sukabumi`).
+3. Berpindah ke tab **Connection**, lengkapi form sesuai dengan data dari Langkah 1:
+   * **Host name/address:** Tempelkan *Host* dari Aiven.
+   * **Port:** Masukkan *Port* yang sesuai.
+   * **Maintenance database:** Isikan nama spesifik *database* Anda.
+   * **Username:** Masukkan *User*.
+   * **Password:** Tempelkan kata sandi, lalu centang **Save password?** agar tidak perlu mengetik ulang nanti.
+4. Klik tombol **Save** untuk memulai koneksi ke server *cloud*.
 
-# Ekstraksi statistik dasar
-stat_summary = df.describe()
-print(stat_summary)
-```
+![Konfigurasi Session Manager pgAdmin]([Masukkan Path Foto pgAdmin Anda])
 
-## 2. Menghitung Skewness, Kurtosis, dan Missing Values
+---
 
-Metrik asimetri, keruncingan, serta pemantauan rekam yang hilang dilakukan dengan metode lanjutan `.skew()`, `.kurtosis()`, dan fungsi pengecekan nol `.isna()`.
+## Langkah 3: Memeriksa Ketersediaan Data di pgAdmin 4
 
-```python
-# Menghitung derajat kemencengan (Skewness)
-print("=== Skewness ===")
-print(df.skew(numeric_only=True))
+Setelah terkoneksi, langkah selanjutnya adalah meninjau data mentah untuk memastikan strukturnya sudah benar.
+1. Melalui panel kiri pgAdmin, rentangkan *tree* menu server Anda menuju Databases > `[Nama Database Anda]` > Schemas > `public` > Tables > `[Nama Tabel Anda]`.
+2. Klik kanan pada tabel tersebut, lalu navigasikan ke **View/Edit Data** > **All Rows**.
+3. Pastikan kolom-kolom penting seperti waktu pengamatan (`date`) dan nilai polutan (`no2`, `co`, `so2`, `o3`) muncul dengan benar.
+4. Pada peninjauan ini, sel data yang bernilai `[null]` adalah hal yang sangat wajar. Nilai ini nantinya akan ditangani sebagai *missing values*.
 
-# Menghitung derajat keruncingan (Kurtosis)
-print("\n=== Kurtosis ===")
-print(df.kurtosis(numeric_only=True))
+![Tampilan Data Polutan di pgAdmin]([Masukkan Path Foto Data pgAdmin Anda])
 
-# Menghitung total data yang kosong (Missing Values)
-print("\n=== Missing Values ===")
-print(df.isna().sum())
-```
+---
+
+## Langkah 4: Membangun Alur Kerja (Workflow) di KNIME Analytics Platform
+
+Sekarang kita beralih ke KNIME untuk mengambil data dari database dan menghitung metrik statistik secara otomatis.
+1. Buka **KNIME Analytics Platform** dan buatlah lembar *workflow* baru.
+2. Dari panel *Node Repository*, cari dan tarik (*drag-and-drop*) *node* berikut ke area *workspace*:
+   * **PostgreSQL Connector:** Untuk membuat jembatan koneksi ke server Aiven.
+   * **DB Table Selector:** Untuk membidik tabel data spesifik di dalam *database*.
+   * **DB Reader:** Untuk mengonversi tabel *database* ke dalam bentuk memori data internal KNIME.
+   * **Statistics:** Untuk memproses perhitungan metrik matematis dari data tersebut.
+3. Hubungkan setiap *node* secara berurutan sesuai daftar di atas (dari Connector hingga Statistics).
+4. **Konfigurasi Node:**
+   * Klik ganda **PostgreSQL Connector**, masukkan detail *Hostname*, *Port*, *Database name*, dan *Credentials* persis seperti langkah Aiven sebelumnya.
+   * Klik ganda **DB Table Selector**, lalu arahkan untuk memilih skema `public` dan tabel polutan Anda.
+5. Klik kanan pada node **DB Reader** dan pilih **Execute**. Lampu indikator hijau akan menyala jika data berhasil dimuat.
+
+![Alur Kerja Database dan Statistik di KNIME]([Masukkan Path Foto Node KNIME Anda])
+
+---
+
+## Langkah 5: Mengeksekusi Output Statistika Deskriptif
+
+Tahap pungkasan adalah menjalankan mesin analitik statistik di dalam KNIME.
+1. Klik kanan pada node **Statistics**, lalu pilih **Execute**.
+2. Setelah lampu berubah hijau, klik kanan lagi pada node **Statistics** dan pilih **Statistics View** (atau klik ikon kaca pembesar).
+3. Sebuah jendela berisi tabel matriks akan terbuka. Anda dapat meninjau:
+   * **Min, Max, Mean:** Rentang konsentrasi harian serta rata-ratanya.
+   * **Std. deviation & Variance:** Analisis volatilitas tingkat polusi.
+   * **Skewness & Kurtosis:** Deteksi asimetri kurva dan keberadaan *outlier*.
+   * **No. missings:** Jumlah rekaman sensor yang bolong/gagal terekam.
+   * **Histogram:** Grafik sederhana dari penyebaran nilainya.
+
+![Tabel Hasil Output Node Statistics]([Masukkan Path Foto Output Statistik KNIME Anda])
 
 ## 3. Penjelasan Distribusi Polutan Kota Sukabumi
 
