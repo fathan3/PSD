@@ -1041,7 +1041,7 @@ Setelah dataset berhasil digabungkan menjadi satu file `Data_Polutan_Kota-Sukabu
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Membaca data yang sudah digabungkan
+# Membaca data yang sudah digabungkaninti
 df_merged = pd.read_csv("Data_Polutan_Kota-Sukabumi.csv")
 df_merged['date'] = pd.to_datetime(df_merged['date'])
 df_merged = df_merged.sort_values('date')
