@@ -242,6 +242,7 @@ df = pd.read_csv("NO2_Warudoyong_TSFEL.csv")
 df.head(10)
 ```
 
+<div style="overflow-x: auto;">
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -296,6 +297,7 @@ df.head(10)
     </tr>
   </tbody>
 </table>
+</div>
 
 ## Penjelasan Domain TSFEL
 
