@@ -1021,12 +1021,12 @@ dataframe_merged = pd.DataFrame({
     "CO": df_so2['CO']
 })
 
-dataframe_merged.to_csv("Data_Polutan_Kota-Warudoyong.csv", index=False)
+dataframe_merged.to_csv("Data_Polutan_Warudoyong.csv", index=False)
 ```
 
 
 ```python
-df = pd.read_csv("Data_Polutan_Kota-Warudoyong.csv")
+df = pd.read_csv("Data_Polutan_Warudoyong.csv")
 df.head(10)
 ```
 
@@ -1058,7 +1058,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Membaca data yang sudah digabungkaninti
-df_merged = pd.read_csv("Data_Polutan_Kota-Warudoyong.csv")
+df_merged = pd.read_csv("Data_Polutan_warudoyong.csv")
 df_merged['date'] = pd.to_datetime(df_merged['date'])
 df_merged = df_merged.sort_values('date')
 
@@ -1077,7 +1077,7 @@ plt.xlabel('Tanggal')
 plt.tight_layout()
 plt.show()
 ```
-![png](Data_Understanding_files/grafik-timeseries.png)
+![png](understanding-warudoyong-files/grafik-timeseries.png)
 
 
 
