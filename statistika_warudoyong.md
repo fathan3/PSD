@@ -106,7 +106,7 @@ Setelah terkoneksi, langkah selanjutnya adalah meninjau data mentah untuk memast
 3. Pastikan kolom-kolom penting seperti waktu pengamatan (`date`) dan nilai polutan (`no2`, `co`, `so2`, `o3`) muncul dengan benar.
 4. Pada peninjauan ini, sel data yang bernilai `[null]` adalah hal yang sangat wajar. Nilai ini nantinya akan ditangani sebagai *missing values*.
 
-![png](statistik_files/pgadmin-view.png)
+![png](statistik-warudoyong-files/view-pgadmin.png)
 
 ---
 
@@ -125,7 +125,7 @@ Sekarang kita beralih ke KNIME untuk mengambil data dari database dan menghitung
    * Klik ganda **DB Table Selector**, lalu arahkan untuk memilih skema `public` dan tabel polutan Anda.
 5. Klik kanan pada node **DB Reader** dan pilih **Execute**. Lampu indikator hijau akan menyala jika data berhasil dimuat.
 
-![png](statistik_files/knime1.png)
+![png](statistik-warudoyong-files/knime1.png)
 
 ---
 
@@ -141,23 +141,23 @@ Tahap pungkasan adalah menjalankan mesin analitik statistik di dalam KNIME.
    * **No. missings:** Jumlah rekaman sensor yang bolong/gagal terekam.
    * **Histogram:** Grafik sederhana dari penyebaran nilainya.
 
-![png](statistik_files/knime2.png)
+![png](statistik-warudoyong-files/knime2.png)
 
-## 3. Penjelasan Distribusi Polutan Kecamatan Warudoyong, Kota Warudoyong
+## 3. Penjelasan Distribusi Polutan Kecamatan Warudoyong, Kota Sukabumi
 
-Berdasarkan ekstraksi dataset historis satelit terhadap langit Kecamatan Warudoyong, Kota Warudoyong dari Agustus 2025 s.d. Agustus 2026 (total 366 hari), berikut narasinya:
+Berdasarkan ekstraksi dataset historis satelit terhadap langit Kecamatan Warudoyong, Kota Sukabumi dari Agustus 2025 s.d. Agustus 2026 (total 365 hari), berikut narasinya:
 
 1. **O3 (Ozon)**
-   Data ozon memiliki ketersediaan paling stabil di antara polutan lain, yaitu hanya terdapat **17 *missing values***. Rata-rata (mean) paparan O3 di wilayah Warudoyong adalah sekitar 0.116. Karena persebaran distribusinya cukup stabil, standar deviasinya sangat kecil. Skewness menunjukkan asimetri positif yang sangat landai, artinya variasi harian Ozon Warudoyong relatif konsisten tanpa banyak lonjakan kejutan.
+   Data ozon memiliki ketersediaan paling stabil di antara polutan lain, yaitu hanya terdapat **17 *missing values***. Rata-rata (mean) paparan O3 di wilayah Warudoyong adalah sekitar 0.11550. Karena persebaran distribusinya cukup stabil, standar deviasinya sangat kecil. Skewness menunjukkan asimetri positif yang sangat landai, artinya variasi harian Ozon Warudoyong relatif konsisten tanpa banyak lonjakan kejutan.
 
 2. **CO (Karbon Monoksida)**
-   Rekam data Karbon Monoksida menunjukkan **168 observasi hilang**. Rata-rata kadar CO di atmosfer Warudoyong berada pada kisaran 0.030 dengan varians yang sangat kecil. Nilai kurtosis dari observasi CO yang rendah menandakan karakteristik platikurtik, di mana frekuensi lonjakan ekstrem gas buangan pembakaran tidak terjadi terlalu signifikan di kota ini.
+   Rekam data Karbon Monoksida menunjukkan **168 observasi hilang**. Rata-rata kadar CO di atmosfer Warudoyong berada pada kisaran 0.02900 dengan varians yang sangat kecil. Nilai kurtosis dari observasi CO yang rendah menandakan karakteristik platikurtik, di mana frekuensi lonjakan ekstrem gas buangan pembakaran tidak terjadi terlalu signifikan di kota ini.
 
 3. **SO2 (Sulfur Dioksida)**
-   Satelit Sentinel kehilangan **247 hari** pantauan (hanya 119 hari valid) yang kemungkinan besar disebabkan tebalnya awan di atas Jawa Barat pada periode hujan. Mean dan Median untuk SO2 nyaris menyentuh angka nol, menandakan bahwa wilayah Warudoyong secara umum sangat bersih dari senyawa pembakaran fosil/batu bara, meskipun pada beberapa observasi menunjukkan sedikit *outlier* yang tecermin dari ekor distribusi.
+   Satelit Sentinel kehilangan **243 hari** pantauan (hanya 122 hari valid) yang kemungkinan besar disebabkan tebalnya awan di atas Jawa Barat pada periode hujan. Mean dan Median untuk SO2 nyaris menyentuh angka nol, menandakan bahwa wilayah Warudoyong secara umum sangat bersih dari senyawa pembakaran fosil/batu bara, meskipun pada beberapa observasi menunjukkan sedikit *outlier* yang tecermin dari ekor distribusi.
 
 4. **NO2 (Nitrogen Dioksida)**
-   Dari total setahun kalender, NO2 kehilangan sebagian besar observasinya hingga **304 data kosong**, sehingga hanya menyisakan sekitar 62 hari data valid. Rata-rata kadar emisi kendaraan berat ini sangat kecil (mendekati 0.00004), namun dari segelintir observasi valid tersebut, terdeteksi beberapa *outlier* atas yang terkonfirmasi oleh deteksi *Isolation Forest* pada tahap sebelumnya. Ekor distribusinya (kurtosis) lebih runcing dibanding polutan lain karena adanya variasi harian mendadak.
+   Dari total setahun kalender, NO2 kehilangan sebagian besar observasinya hingga **302 data kosong**, sehingga hanya menyisakan sekitar 63 hari data valid. Rata-rata kadar emisi kendaraan berat ini sangat kecil (mendekati 0.000038), namun dari segelintir observasi valid tersebut, terdeteksi beberapa *outlier* atas yang terkonfirmasi oleh deteksi *Isolation Forest* pada tahap sebelumnya. Ekor distribusinya (kurtosis) lebih runcing dibanding polutan lain karena adanya variasi harian mendadak.
 
 ---
 
@@ -170,14 +170,14 @@ Sebagai rujukan matematis, berikut merupakan contoh penerapan perhitungan manual
 $$ s = \sqrt{\frac{\sum_{i=1}^{n} (x_i - \bar{x})^2}{n-1}} $$
 
 Diketahui:
-- $n$ adalah jumlah baris valid (karena terdapat 17 missing values dari total 366 hari, $n = 366 - 17 = 349$)
-- $\bar{x}$ (rata-rata $O_3$) $\approx 0.11548$
+- $n$ adalah jumlah baris valid (karena terdapat 17 missing values dari total 365 hari, $n = 365 - 17 = 348$)
+- $\bar{x}$ (rata-rata $O_3$) $\approx 0.11550$
 
 $$
 \begin{aligned}
-s &= \sqrt{\frac{\sum_{i=1}^{349} (x_i - 0.11548)^2}{349-1}}\\
+s &= \sqrt{\frac{\sum_{i=1}^{348} (x_i - 0.11550)^2}{348-1}}\\
 \\
-s &\approx 0.00296
+s &\approx 0.00291
 \end{aligned}
 $$
 
@@ -188,8 +188,8 @@ Variansi dapat dihitung secara langsung dengan mengkuadratkan Standar Deviasi ($
 $$
 \begin{aligned}
 v &= s^2\\
-v &= 0.00296^2\\
-v &\approx 0.000008748 \ (8.748 \times 10^{-6})
+v &= 0.00291^2\\
+v &\approx 0.000008490 \ (8.490e-06)
 \end{aligned}
 $$
 
@@ -201,31 +201,31 @@ Rumus ini dikomposisikan dalam dua blok konstanta dan penjumlahan momen:
 
 $$
 \begin{aligned}
-A &= \frac{n}{(n-1)(n-2)} = \frac{349}{(348)(347)} = \frac{349}{120756} \approx 0.002890\\
+A &= \frac{348}{(348-1)(348-2)} = \frac{348}{120062} \approx 0.002899\\
 \\
-B &= \sum_{i=1}^{349}\left(\frac{x_i-0.11548}{0.00296}\right)^3
+B &= \sum_{i=1}^{348}\left(\frac{x_i-0.11550}{0.00291}\right)^3
 \end{aligned}
 $$
 
-Berdasarkan data aktual, nilai penyimpangan dipangkat tiga ($B$) adalah $100.54$:
+Berdasarkan data aktual, nilai penyimpangan dipangkat tiga ($B$) adalah $118.19$:
 
 $$
 \begin{aligned}
 Skewness &= A \times B\\
-Skewness &= 0.002890 \times 100.54 \approx 0.2906
+Skewness &= 0.002899 \times 118.19 \approx 0.3426
 \end{aligned}
 $$
 *(Menandakan asimetri positif).*
 
 4. **Overall Sum**
 
-Jumlah kumulatif dari 349 nilai pengamatan valid Ozon selama setahun pemantauan.
+Jumlah kumulatif dari 348 nilai pengamatan valid Ozon selama setahun pemantauan.
 
 $$
 \begin{aligned}
 OS &= \sum_{i=1}^{n}x_i \\
-OS &= 0.113990 + 0.118087 + 0.116691 + \dots + x_{349} \\
-OS &\approx 40.304
+OS &= 0.113990 + 0.118087 + 0.116691 + \dots + x_{348} \\
+OS &\approx 40.194
 \end{aligned}
 $$
 
@@ -237,13 +237,13 @@ Langkah serupa dapat diaplikasikan pada Karbon Monoksida. Berikut adalah penjaba
 
 1. **Standar Deviasi**
 Diketahui:
-- $n = 366 - 168 = 198$ data valid (168 *missing values*)
-- $\bar{x}$ (rata-rata $CO$) $\approx 0.02915$
+- $n = 365 - 168 = 197$ data valid (168 *missing values*)
+- $\bar{x}$ (rata-rata $CO$) $\approx 0.02900$
 
 $$
 \begin{aligned}
-s &= \sqrt{\frac{\sum_{i=1}^{198} (x_i - 0.02915)^2}{198-1}}\\
-s &\approx 0.00406
+s &= \sqrt{\frac{\sum_{i=1}^{197} (x_i - 0.02900)^2}{197-1}}\\
+s &\approx 0.00419
 \end{aligned}
 $$
 
@@ -251,29 +251,29 @@ $$
 $$
 \begin{aligned}
 v &= s^2\\
-v &= 0.00406^2\\
-v &\approx 0.0000165 \ (1.65 \times 10^{-5})
+v &= 0.00419^2\\
+v &\approx 0.0000176 \ (1.76e-05)
 \end{aligned}
 $$
 
 3. **Skewness**
 $$
 \begin{aligned}
-A &= \frac{198}{(198-1)(198-2)} = \frac{198}{38612} \approx 0.005128\\
-B &= \sum_{i=1}^{198}\left(\frac{x_i-0.02915}{0.00406}\right)^3
+A &= \frac{197}{(197-1)(197-2)} = \frac{197}{38220} \approx 0.005154\\
+B &= \sum_{i=1}^{197}\left(\frac{x_i-0.02900}{0.00419}\right)^3
 \end{aligned}
 $$
-Berdasarkan data aktual, nilai simpangan kumulatif ($B$) adalah $31.015$, maka:
+Berdasarkan data aktual, nilai simpangan kumulatif ($B$) adalah $48.726$, maka:
 $$
 \begin{aligned}
-Skewness &= 0.005128 \times 31.015 \approx 0.1590
+Skewness &= 0.005154 \times 48.726 \approx 0.2511
 \end{aligned}
 $$
 
 4. **Overall Sum**
 $$
 \begin{aligned}
-OS &= \sum_{i=1}^{198}x_i \approx 5.772
+OS &= \sum_{i=1}^{197}x_i \approx 5.714
 \end{aligned}
 $$
 
@@ -285,42 +285,42 @@ Karena SO2 di Warudoyong memiliki tingkat observasi yang banyak hilang karena te
 
 1. **Standar Deviasi**
 Diketahui:
-- $n = 366 - 247 = 119$ data valid (247 *missing values*)
-- $\bar{x}$ (rata-rata $SO_2$) $\approx 0.0000195$
+- $n = 365 - 243 = 122$ data valid (243 *missing values*)
+- $\bar{x}$ (rata-rata $SO_2$) $\approx 0.0000255$
 
 $$
 \begin{aligned}
-s &= \sqrt{\frac{\sum_{i=1}^{119} (x_i - 0.0000195)^2}{119-1}}\\
-s &\approx 0.000220
+s &= \sqrt{\frac{\sum_{i=1}^{122} (x_i - 0.0000255)^2}{122-1}}\\
+s &\approx 0.000219
 \end{aligned}
 $$
 
 2. **Variansi**
 $$
 \begin{aligned}
-v &= 0.000220^2\\
-v &\approx 0.0000000482 \ (4.82 \times 10^{-8})
+v &= 0.000219^2\\
+v &\approx 0.0000000479 \ (4.79e-08)
 \end{aligned}
 $$
 
 3. **Skewness**
 $$
 \begin{aligned}
-A &= \frac{119}{(119-1)(119-2)} = \frac{119}{13806} \approx 0.008620\\
-B &= \sum_{i=1}^{119}\left(\frac{x_i - 0.0000195}{0.000220}\right)^3
+A &= \frac{122}{(122-1)(122-2)} = \frac{122}{14520} \approx 0.008402\\
+B &= \sum_{i=1}^{122}\left(\frac{x_i - 0.0000255}{0.000219}\right)^3
 \end{aligned}
 $$
-Berdasarkan data aktual, $B = 3.197$:
+Berdasarkan data aktual, $B = -12.504$:
 $$
 \begin{aligned}
-Skewness &= 0.008620 \times 3.197 \approx 0.02756
+Skewness &= 0.008402 \times -12.504 \approx -0.10506
 \end{aligned}
 $$
 
 4. **Overall Sum**
 $$
 \begin{aligned}
-OS &= \sum_{i=1}^{119}x_i \approx 0.002320
+OS &= \sum_{i=1}^{122}x_i \approx 0.003112
 \end{aligned}
 $$
 
@@ -332,41 +332,41 @@ Gas NO2 menjadi parameter dengan jumlah data valid paling sedikit (paling banyak
 
 1. **Standar Deviasi**
 Diketahui:
-- $n = 366 - 304 = 62$ data valid (304 *missing values*)
-- $\bar{x}$ (rata-rata $NO_2$) $\approx 0.00003447$
+- $n = 365 - 302 = 63$ data valid (302 *missing values*)
+- $\bar{x}$ (rata-rata $NO_2$) $\approx 0.00003825$
 
 $$
 \begin{aligned}
-s &= \sqrt{\frac{\sum_{i=1}^{62} (x_i - 0.00003447)^2}{62-1}}\\
-s &\approx 0.00001632
+s &= \sqrt{\frac{\sum_{i=1}^{63} (x_i - 0.00003825)^2}{63-1}}\\
+s &\approx 0.00001676
 \end{aligned}
 $$
 
 2. **Variansi**
 $$
 \begin{aligned}
-v &= 0.00001632^2\\
-v &\approx 0.0000000002664 \ (2.664 \times 10^{-10})
+v &= 0.00001676^2\\
+v &\approx 0.0000000002809 \ (2.809e-10)
 \end{aligned}
 $$
 
 3. **Skewness**
 $$
 \begin{aligned}
-A &= \frac{62}{(62-1)(62-2)} = \frac{62}{3660} \approx 0.01694\\
-B &= \sum_{i=1}^{62}\left(\frac{x_i - 0.00003447}{0.00001632}\right)^3
+A &= \frac{63}{(63-1)(63-2)} = \frac{63}{3782} \approx 0.01666\\
+B &= \sum_{i=1}^{63}\left(\frac{x_i - 0.00003825}{0.00001676}\right)^3
 \end{aligned}
 $$
-Berdasarkan data aktual, nilai simpangan kumulatif ($B$) adalah $B = -6.096$:
+Berdasarkan data aktual, nilai simpangan kumulatif ($B$) adalah $B = -12.305$:
 $$
 \begin{aligned}
-Skewness &= 0.01694 \times -6.096 \approx -0.1033
+Skewness &= 0.01666 \times -12.305 \approx -0.2050
 \end{aligned}
 $$
 
 4. **Overall Sum**
 $$
 \begin{aligned}
-OS &= \sum_{i=1}^{62}x_i \approx 0.002137
+OS &= \sum_{i=1}^{63}x_i \approx 0.002410
 \end{aligned}
 $$
