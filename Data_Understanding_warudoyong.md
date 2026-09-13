@@ -42,9 +42,9 @@ Visit <a href="https://identity.dataspace.copernicus.eu/auth/realms/CDSE/device?
 
 ## 3. Definisi Area (AOI) dan Pengambilan Data Polutan
 
-Selanjutnya, kita mendefinisikan batas wilayah operasional (*Area of Interest*) dari target observasi Kecamatan Warudoyong, Kota Warudoyong menggunakan rumusan koordinat berformat **Polygon GeoJSON**.
+Selanjutnya, kita mendefinisikan batas wilayah operasional (*Area of Interest*) dari target observasi Kecamatan Warudoyong, Kota Sukabumi menggunakan rumusan koordinat berformat **Polygon GeoJSON**.
 
-![png](Data_Understanding_files/geojson.png)
+![png](understanding-warudoyong-files/geojson.png)
 
 Berdasarkan batasan poligon tersebut, instrumen satelit akan mengekstrak data pemantauan kualitas udara yang spesifik berada dalam yurisdiksi Warudoyong. Sistem pada *backend* kemudian langsung melakukan dua tahap komputasi otomatis: **agregasi spasial** (menghitung nilai kalkulasi rata-rata dari seluruh radius piksel cakupan area Warudoyong) dan **agregasi temporal harian** (menghitung nilai penyederhanaan agregat rata-rata harian).
 
@@ -53,26 +53,36 @@ Berdasarkan batasan poligon tersebut, instrumen satelit akan mengekstrak data pe
 ```python
 aoi = {
     "type": "Polygon",
-    # Paste koordinat yang didapat
     "coordinates": [
         [
-            [106.90847, -6.9167907],
-            [106.9086508, -6.9388744],
-            [106.9532335, -6.9365404],
-            [106.9519675, -6.9206509],
-            [106.90847, -6.9167907],
+            [106.8988427, -6.9125063],
+            [106.8978516, -6.9175151],
+            [106.8983021, -6.9248493],
+            [106.9001942, -6.930484],
+            [106.9086634, -6.9414849],
+            [106.9121802, -6.9506932],
+            [106.916123, -6.9473549],
+            [106.9211096, -6.9505781],
+            [106.9279516, -6.9516141],
+            [106.9346776, -6.9500025],
+            [106.9330541, -6.9426352],
+            [106.9306188, -6.9418294],
+            [106.9343297, -6.9232953],
+            [106.9358373, -6.9232953],
+            [106.9359533, -6.9185753],
+            [106.8988427, -6.9125063]
         ]
     ]
 }
 
 s5post = connection.load_collection(
     "SENTINEL_5P_L2",
-    temporal_extent=["2025-08-28", "2026-08-28"],
+    temporal_extent=["2025-08-31", "2026-08-31"],
     spatial_extent={
-        "west": 106.90847,
-        "south": -6.9388744,
-        "east": 106.9532335,
-        "north": -6.9167907
+        "west": 106.8978516,
+        "south": -6.9516141,
+        "east": 106.9359533,
+        "north": -6.9125063
     },
     # Disesuaikan dengan data yang dibutuhkan
     bands=["NO2"],
@@ -82,7 +92,7 @@ s5post = connection.load_collection(
 s5p_no2_daily = s5post.aggregate_temporal_period(reducer="mean", period="day")
 
 # Agregasi spasial untuk menghasilkan rata-rata time series per AOI
-s5p_no2_aoi = s5p_no2_daily.aggregate_spatial(reducer="mean", geometries=aoi)
+s5p_no2_aoi = s5p_no2_daily.aggregate_spatial(reducer="mean", geometries=aoi);
 
 # Simpan hasil sebagai CSV
 result = s5p_no2_aoi.save_result(format="CSV")
@@ -95,24 +105,21 @@ job.start_and_wait()
 job.get_results().download_files("output_no2")
 ```
 
-    0:00:00 Job 'j-2608301553194782b4b6f3d983fd9da1': send 'start'
-    0:00:03 Job 'j-2608301553194782b4b6f3d983fd9da1': queued (progress 0%)
-    0:00:08 Job 'j-2608301553194782b4b6f3d983fd9da1': queued (progress 0%)
-    0:00:15 Job 'j-2608301553194782b4b6f3d983fd9da1': queued (progress 0%)
-    0:00:23 Job 'j-2608301553194782b4b6f3d983fd9da1': queued (progress 0%)
-    0:00:33 Job 'j-2608301553194782b4b6f3d983fd9da1': queued (progress 0%)
-    0:00:45 Job 'j-2608301553194782b4b6f3d983fd9da1': queued (progress 0%)
-    0:01:01 Job 'j-2608301553194782b4b6f3d983fd9da1': running (progress N/A)
-    0:01:21 Job 'j-2608301553194782b4b6f3d983fd9da1': running (progress N/A)
-    0:01:45 Job 'j-2608301553194782b4b6f3d983fd9da1': running (progress N/A)
-    0:02:15 Job 'j-2608301553194782b4b6f3d983fd9da1': running (progress N/A)
-    0:02:52 Job 'j-2608301553194782b4b6f3d983fd9da1': running (progress N/A)
-    0:03:39 Job 'j-2608301553194782b4b6f3d983fd9da1': finished (progress 100%)
+    0:00:00 Job 'j-26091305103044cab8dace38b14d34df': send 'start'
+    0:00:03 Job 'j-26091305103044cab8dace38b14d34df': queued (progress 0%)
+    0:00:08 Job 'j-26091305103044cab8dace38b14d34df': queued (progress 0%)
+    0:00:15 Job 'j-26091305103044cab8dace38b14d34df': queued (progress 0%)
+    0:00:23 Job 'j-26091305103044cab8dace38b14d34df': queued (progress 0%)
+    0:00:33 Job 'j-26091305103044cab8dace38b14d34df': queued (progress 0%)
+    0:00:45 Job 'j-26091305103044cab8dace38b14d34df': running (progress N/A)
+    0:01:01 Job 'j-26091305103044cab8dace38b14d34df': running (progress N/A)
+    0:01:20 Job 'j-26091305103044cab8dace38b14d34df': running (progress N/A)
+    0:01:45 Job 'j-26091305103044cab8dace38b14d34df': running (progress N/A)
+    0:02:15 Job 'j-26091305103044cab8dace38b14d34df': running (progress N/A)
+    0:02:52 Job 'j-26091305103044cab8dace38b14d34df': running (progress N/A)
+    0:03:39 Job 'j-26091305103044cab8dace38b14d34df': running (progress N/A)
+    0:04:38 Job 'j-26091305103044cab8dace38b14d34df': finished (progress 100%)
     
-
-
-
-
     [PosixPath('output_no2/timeseries.csv'),
      PosixPath('output_no2/job-results.json')]
 
@@ -122,14 +129,24 @@ job.get_results().download_files("output_no2")
 ```python
 aoi = {
     "type": "Polygon",
-    # Paste koordinat yang didapat
     "coordinates": [
         [
-            [106.90847, -6.9167907],
-            [106.9086508, -6.9388744],
-            [106.9532335, -6.9365404],
-            [106.9519675, -6.9206509],
-            [106.90847, -6.9167907],
+            [106.8988427, -6.9125063],
+            [106.8978516, -6.9175151],
+            [106.8983021, -6.9248493],
+            [106.9001942, -6.930484],
+            [106.9086634, -6.9414849],
+            [106.9121802, -6.9506932],
+            [106.916123, -6.9473549],
+            [106.9211096, -6.9505781],
+            [106.9279516, -6.9516141],
+            [106.9346776, -6.9500025],
+            [106.9330541, -6.9426352],
+            [106.9306188, -6.9418294],
+            [106.9343297, -6.9232953],
+            [106.9358373, -6.9232953],
+            [106.9359533, -6.9185753],
+            [106.8988427, -6.9125063]
         ]
     ]
 }
@@ -138,10 +155,10 @@ s5post = connection.load_collection(
     "SENTINEL_5P_L2",
     temporal_extent=["2025-08-28", "2026-08-28"],
     spatial_extent={
-        "west": 106.90847,
-        "south": -6.9388744,
-        "east": 106.9532335,
-        "north": -6.9167907
+        "west": 106.8978516,
+        "south": -6.9516141,
+        "east": 106.9359533,
+        "north": -6.9125063
     },
     # Disesuaikan dengan data yang dibutuhkan
     bands=["SO2"],
@@ -164,27 +181,22 @@ job.start_and_wait()
 job.get_results().download_files("output_so2")
 ```
 
-    0:00:00 Job 'j-26083015591542dbb70b9e0f11da6e88': send 'start'
-    0:00:02 Job 'j-26083015591542dbb70b9e0f11da6e88': created (progress 0%)
-    0:00:08 Job 'j-26083015591542dbb70b9e0f11da6e88': queued (progress 0%)
-    0:00:14 Job 'j-26083015591542dbb70b9e0f11da6e88': queued (progress 0%)
-    0:00:23 Job 'j-26083015591542dbb70b9e0f11da6e88': running (progress N/A)
-    0:00:33 Job 'j-26083015591542dbb70b9e0f11da6e88': running (progress N/A)
-    0:00:45 Job 'j-26083015591542dbb70b9e0f11da6e88': running (progress N/A)
-    0:01:01 Job 'j-26083015591542dbb70b9e0f11da6e88': running (progress N/A)
-    0:01:20 Job 'j-26083015591542dbb70b9e0f11da6e88': running (progress N/A)
-    0:01:45 Job 'j-26083015591542dbb70b9e0f11da6e88': running (progress N/A)
-    0:02:15 Job 'j-26083015591542dbb70b9e0f11da6e88': running (progress N/A)
-    0:02:52 Job 'j-26083015591542dbb70b9e0f11da6e88': running (progress N/A)
-    0:03:39 Job 'j-26083015591542dbb70b9e0f11da6e88': finished (progress 100%)
+    0:00:00 Job 'j-26091305151446419877c58a848c3e87': send 'start'
+    0:00:02 Job 'j-26091305151446419877c58a848c3e87': queued (progress 0%)
+    0:00:07 Job 'j-26091305151446419877c58a848c3e87': queued (progress 0%)
+    0:00:14 Job 'j-26091305151446419877c58a848c3e87': queued (progress 0%)
+    0:00:22 Job 'j-26091305151446419877c58a848c3e87': queued (progress 0%)
+    0:00:32 Job 'j-26091305151446419877c58a848c3e87': queued (progress 0%)
+    0:00:44 Job 'j-26091305151446419877c58a848c3e87': queued (progress 0%)
+    0:01:00 Job 'j-26091305151446419877c58a848c3e87': running (progress N/A)
+    0:01:19 Job 'j-26091305151446419877c58a848c3e87': running (progress N/A)
+    0:01:43 Job 'j-26091305151446419877c58a848c3e87': running (progress N/A)
+    0:02:14 Job 'j-26091305151446419877c58a848c3e87': running (progress N/A)
+    0:02:51 Job 'j-26091305151446419877c58a848c3e87': running (progress N/A)
+    0:03:38 Job 'j-26091305151446419877c58a848c3e87': finished (progress 100%)
     
-
-
-
-
     [PosixPath('output_so2/timeseries.csv'),
      PosixPath('output_so2/job-results.json')]
-
 
 
 ### 3. Pengambilan Data O₃
@@ -192,14 +204,24 @@ job.get_results().download_files("output_so2")
 ```python
 aoi = {
     "type": "Polygon",
-    # Paste koordinat yang didapat
     "coordinates": [
         [
-            [106.90847, -6.9167907],
-            [106.9086508, -6.9388744],
-            [106.9532335, -6.9365404],
-            [106.9519675, -6.9206509],
-            [106.90847, -6.9167907],
+            [106.8988427, -6.9125063],
+            [106.8978516, -6.9175151],
+            [106.8983021, -6.9248493],
+            [106.9001942, -6.930484],
+            [106.9086634, -6.9414849],
+            [106.9121802, -6.9506932],
+            [106.916123, -6.9473549],
+            [106.9211096, -6.9505781],
+            [106.9279516, -6.9516141],
+            [106.9346776, -6.9500025],
+            [106.9330541, -6.9426352],
+            [106.9306188, -6.9418294],
+            [106.9343297, -6.9232953],
+            [106.9358373, -6.9232953],
+            [106.9359533, -6.9185753],
+            [106.8988427, -6.9125063]
         ]
     ]
 }
@@ -208,10 +230,10 @@ s5post = connection.load_collection(
     "SENTINEL_5P_L2",
     temporal_extent=["2025-08-28", "2026-08-28"],
     spatial_extent={
-        "west": 106.90847,
-        "south": -6.9388744,
-        "east": 106.9532335,
-        "north": -6.9167907
+        "west": 106.8978516,
+        "south": -6.9516141,
+        "east": 106.9359533,
+        "north": -6.9125063
     },
     # Disesuaikan dengan data yang dibutuhkan
     bands=["O3"],
@@ -234,28 +256,22 @@ job.start_and_wait()
 job.get_results().download_files("output_o3")
 ```
 
-    0:00:00 Job 'j-26083016051940d4bb68991ca6a88694': send 'start'
-    0:00:02 Job 'j-26083016051940d4bb68991ca6a88694': queued (progress 0%)
-    0:00:08 Job 'j-26083016051940d4bb68991ca6a88694': queued (progress 0%)
-    0:00:14 Job 'j-26083016051940d4bb68991ca6a88694': queued (progress 0%)
-    0:00:22 Job 'j-26083016051940d4bb68991ca6a88694': queued (progress 0%)
-    0:00:32 Job 'j-26083016051940d4bb68991ca6a88694': queued (progress 0%)
-    0:00:45 Job 'j-26083016051940d4bb68991ca6a88694': queued (progress 0%)
-    0:01:01 Job 'j-26083016051940d4bb68991ca6a88694': queued (progress 0%)
-    0:01:20 Job 'j-26083016051940d4bb68991ca6a88694': running (progress N/A)
-    0:01:44 Job 'j-26083016051940d4bb68991ca6a88694': running (progress N/A)
-    0:02:14 Job 'j-26083016051940d4bb68991ca6a88694': running (progress N/A)
-    0:02:52 Job 'j-26083016051940d4bb68991ca6a88694': running (progress N/A)
-    0:03:39 Job 'j-26083016051940d4bb68991ca6a88694': finished (progress 100%)
+    0:00:00 Job 'j-260913051858458ba6d0b3a9d502a85d': send 'start'
+    0:00:03 Job 'j-260913051858458ba6d0b3a9d502a85d': queued (progress 0%)
+    0:00:09 Job 'j-260913051858458ba6d0b3a9d502a85d': queued (progress 0%)
+    0:00:15 Job 'j-260913051858458ba6d0b3a9d502a85d': queued (progress 0%)
+    0:00:23 Job 'j-260913051858458ba6d0b3a9d502a85d': queued (progress 0%)
+    0:00:33 Job 'j-260913051858458ba6d0b3a9d502a85d': queued (progress 0%)
+    0:00:46 Job 'j-260913051858458ba6d0b3a9d502a85d': queued (progress 0%)
+    0:01:01 Job 'j-260913051858458ba6d0b3a9d502a85d': queued (progress 0%)
+    0:01:21 Job 'j-260913051858458ba6d0b3a9d502a85d': running (progress N/A)
+    0:01:45 Job 'j-260913051858458ba6d0b3a9d502a85d': running (progress N/A)
+    0:02:15 Job 'j-260913051858458ba6d0b3a9d502a85d': running (progress N/A)
+    0:02:53 Job 'j-260913051858458ba6d0b3a9d502a85d': running (progress N/A)
+    0:03:40 Job 'j-260913051858458ba6d0b3a9d502a85d': finished (progress 100%)
     
-
-
-
-
     [PosixPath('output_o3/timeseries.csv'),
      PosixPath('output_o3/job-results.json')]
-
-
 
 
 ### 4. Pengambilan Data CO
@@ -856,7 +872,7 @@ plt.show()
 
 
     
-![png](Data_Understanding_files/Data_Understanding_36_1.png)
+![png](understanding-warudoyong-files/outlier1.png)
     
 
 
@@ -892,12 +908,12 @@ plt.grid(True)
 plt.show()
 ```
 
-    Jumlah outlier untuk SO2: 6
+    Jumlah outlier untuk SO2: 7
     
 
 
     
-![png](Data_Understanding_files/Data_Understanding_38_1.png)
+![png](understanding-warudoyong-files/outlier2.png)
     
 
 
@@ -938,7 +954,7 @@ plt.show()
 
 
     
-![png](Data_Understanding_files/Data_Understanding_40_1.png)
+![png](understanding-warudoyong-files/outlier3.png)
     
 
 
@@ -974,12 +990,12 @@ plt.grid(True)
 plt.show()
 ```
 
-    Jumlah outlier untuk CO: 10
+    Jumlah outlier untuk CO: 9
     
 
 
     
-![png](Data_Understanding_files/Data_Understanding_42_1.png)
+![png](understanding-warudoyong-files/outlier4.png)
     
 
 
