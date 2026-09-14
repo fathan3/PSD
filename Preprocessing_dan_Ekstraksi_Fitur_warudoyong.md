@@ -245,7 +245,7 @@ df.head(10)
 ```
 
 <div style="overflow-x: auto;">
-<table border="1" class="dataframe">
+<table border="1" class="dataframe dataframe">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -259,7 +259,54 @@ df.head(10)
       <th>calc_median</th>
       <th>calc_min</th>
       <th>calc_std</th>
-      <th>...</th>
+      <th>calc_var</th>
+      <th>dfa</th>
+      <th>distance</th>
+      <th>ecdf</th>
+      <th>ecdf_percentile</th>
+      <th>ecdf_percentile_count</th>
+      <th>ecdf_slope</th>
+      <th>entropy</th>
+      <th>fundamental_frequency</th>
+      <th>higuchi_fractal_dimension</th>
+      <th>hist_mode</th>
+      <th>human_range_energy</th>
+      <th>hurst_exponent</th>
+      <th>interq_range</th>
+      <th>kurtosis</th>
+      <th>lempel_ziv</th>
+      <th>lpcc</th>
+      <th>max_frequency</th>
+      <th>max_power_spectrum</th>
+      <th>maximum_fractal_length</th>
+      <th>mean_abs_deviation</th>
+      <th>mean_abs_diff</th>
+      <th>mean_diff</th>
+      <th>median_abs_deviation</th>
+      <th>median_abs_diff</th>
+      <th>median_diff</th>
+      <th>median_frequency</th>
+      <th>mfcc</th>
+      <th>mse</th>
+      <th>negative_turning</th>
+      <th>neighbourhood_peaks</th>
+      <th>petrosian_fractal_dimension</th>
+      <th>pk_pk_distance</th>
+      <th>positive_turning</th>
+      <th>power_bandwidth</th>
+      <th>rms</th>
+      <th>skewness</th>
+      <th>slope</th>
+      <th>spectral_centroid</th>
+      <th>spectral_decrease</th>
+      <th>spectral_distance</th>
+      <th>spectral_entropy</th>
+      <th>spectral_kurtosis</th>
+      <th>spectral_positive_turning</th>
+      <th>spectral_roll_off</th>
+      <th>spectral_roll_on</th>
+      <th>spectral_skewness</th>
+      <th>spectral_slope</th>
       <th>spectral_spread</th>
       <th>spectral_variation</th>
       <th>spectrogram_mean_coeff</th>
@@ -285,7 +332,54 @@ df.head(10)
       <td>0.000036</td>
       <td>0.000008</td>
       <td>0.000011</td>
-      <td>...</td>
+      <td>1.291727e-10</td>
+      <td>1.258093</td>
+      <td>365.0</td>
+      <td>0.015027</td>
+      <td>0.000035</td>
+      <td>182.5</td>
+      <td>38782.062755</td>
+      <td>0.996792</td>
+      <td>0.005464</td>
+      <td>1.611949</td>
+      <td>0.000038</td>
+      <td>0.0</td>
+      <td>0.940708</td>
+      <td>0.000014</td>
+      <td>-0.148139</td>
+      <td>0.139344</td>
+      <td>0.804566</td>
+      <td>0.371585</td>
+      <td>50.384905</td>
+      <td>-2.94103</td>
+      <td>0.000009</td>
+      <td>0.000002</td>
+      <td>1.005209e-07</td>
+      <td>0.000007</td>
+      <td>7.862599e-07</td>
+      <td>2.631903e-07</td>
+      <td>0.019126</td>
+      <td>2.267015</td>
+      <td>0.714849</td>
+      <td>21.0</td>
+      <td>11.0</td>
+      <td>1.008021</td>
+      <td>0.000054</td>
+      <td>21.0</td>
+      <td>0.120219</td>
+      <td>0.000037</td>
+      <td>0.025815</td>
+      <td>5.388853e-08</td>
+      <td>0.083306</td>
+      <td>-3.317551</td>
+      <td>-2.146363</td>
+      <td>0.561411</td>
+      <td>4.652587</td>
+      <td>50.0</td>
+      <td>0.371585</td>
+      <td>0.0</td>
+      <td>1.610303</td>
+      <td>-0.043015</td>
       <td>0.123104</td>
       <td>0.441446</td>
       <td>1.280249e-10</td>
