@@ -238,6 +238,8 @@ Berhasil! Jumlah fitur yang diekstrak pada NO2: 68
 Preview ringkas dimensi matriks yang dihasilkan oleh TSFEL:
 
 ```python
+import pandas as pd
+pd.set_option('display.max_columns', None)
 df = pd.read_csv("NO2_Warudoyong_TSFEL.csv")
 df.head(10)
 ```
