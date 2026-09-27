@@ -50,6 +50,8 @@ plt.grid(True)
 plt.show()
 ```
 
+![Evaluasi Jumlah Cluster dengan Elbow Method (NO2)](clustering_polutan/elbow_no2.png)
+
 #### 2. SO2
 
 ```python
@@ -85,6 +87,8 @@ plt.ylabel('Inersia (Jarak Kuadrat)')
 plt.grid(True)
 plt.show()
 ```
+
+![Evaluasi Jumlah Cluster dengan Elbow Method (SO2)](clustering_polutan/elbow_so2.png)
 
 #### 3. CO
 
@@ -122,7 +126,10 @@ plt.grid(True)
 plt.show()
 ```
 
+![Evaluasi Jumlah Cluster dengan Elbow Method (CO)](clustering_polutan/elbow_co.png)
+
 > **Catatan Analisis Elbow**: Titik kelengkukan ("siku") pada kurva inersia mengindikasikan batas efisiensi penambahan jumlah kluster. Ketika landaian grafik mulai melambat secara signifikan, jumlah $K$ di titik pembelokan tersebut dipilih sebagai nilai kluster paling ideal.
+
 
 ---
 
@@ -220,6 +227,8 @@ cluster_4    11
 Name: count, dtype: int64
 ```
 
+![Scatter Plot Persebaran Kluster (NO2)](clustering_polutan/scatter_no2.png)
+
 #### 2. SO2
 
 ```python
@@ -310,6 +319,8 @@ cluster_4     1
 Name: count, dtype: int64
 ```
 
+![Scatter Plot Persebaran Kluster (SO2)](clustering_polutan/scatter_so2.png)
+
 #### 3. CO
 
 ```python
@@ -399,6 +410,9 @@ cluster_3     1
 cluster_4    21
 Name: count, dtype: int64
 ```
+
+![Scatter Plot Persebaran Kluster (CO)](clustering_polutan/scatter_co.png)
+
 
 ---
 
