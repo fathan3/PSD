@@ -8,3 +8,7 @@ Secara garis besar, dokumentasi proyek pemantauan kualitas udara Kecamatan Warud
 
 1. **Business Understanding**: Merumuskan pemahaman dasar mengenai latar belakang masalah polusi, penetapan tujuan proyek, serta manfaat esensial dari proses analitik yang dijalankan bagi kemajuan daerah.
 2. **Data Understanding**: Memulai proses otorisasi, penarikan data langsung dari sumber satelit, serta pembersihan dan identifikasi pola dasar (*Exploratory Data Analysis*) pada kumpulan data polutan historis harian yang didapatkan.
+3. **Statistika Deskriptif**: Menghitung ringkasan statistik dasar (mean, median, varians, standar deviasi, skewness, kurtosis) untuk memahami sebaran awal data polutan.
+4. **Preprocessing dan Ekstraksi Fitur**: Pembersihan anomali (*outliers*) menggunakan batas IQR, interpolasi linier untuk mengisi data kosong, dan ekstraksi 68 fitur waktu (*TSFEL*).
+5. **K-Means Clustering**: Mengelompokkan kualitas udara harian ke dalam kluster tingkat polusi (Rendah, Sedang, Tinggi) menggunakan algoritma Unsupervised Learning K-Means.
+

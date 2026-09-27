@@ -15,3 +15,5 @@ chapters:
   - file: Data_Understanding_warudoyong
   - file: statistika_warudoyong
   - file: Preprocessing_dan_Ekstraksi_Fitur_warudoyong
+  - file: K_Means_Clustering
+
