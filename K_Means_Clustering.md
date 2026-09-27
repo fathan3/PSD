@@ -407,7 +407,7 @@ Name: count, dtype: int64
 Selain eksekusi berbasis skrip Python, pengolahan *clustering* juga dirancang secara visual menggunakan perangkat lunak **KNIME Analytics Platform** untuk memastikan transparansi alur kerja pemrosesan data.
 
 <!-- Gambar Screenshot Workflow KNIME (Ubah path/nama file gambar di bawah ini jika sesuai) -->
-![Visualisasi Alur Kerja (Workflow) K-Means pada KNIME](./img/clustering_polutan/alur.png)
+![Visualisasi Alur Kerja (Workflow) K-Means pada KNIME](clustering_polutan/alur.png)
 
 Berdasarkan struktur diagram *workflow* KNIME yang dibangun, berikut adalah uraian fungsional dari setiap komponen node utama:
 
@@ -432,7 +432,7 @@ Berikut adalah sajian visualisasi *Scatter Plot* hasil *Clustering K-Means* dari
 ### 3.1 Polutan NO2 (K = 6)
 
 <!-- Gambar Screenshot Scatter Plot NO2 dari KNIME -->
-![Visualisasi Scatter Plot Hasil Clustering K-Means (NO2)](./img/clustering_polutan/scatter_plot_NO2.png)
+![Visualisasi Scatter Plot Hasil Clustering K-Means (NO2)](clustering_polutan/plot_no2.png)
 
 Berdasarkan pemetaan grafik scatter untuk polutan **$\text{NO}_2$**, pembagian kluster memisahkan data ke dalam 6 kelompok (`cluster_0` hingga `cluster_5`). Beberapa temuan penting dari distribusi pola ini antara lain:
 
@@ -446,7 +446,7 @@ Berdasarkan pemetaan grafik scatter untuk polutan **$\text{NO}_2$**, pembagian k
 ### 3.2 Polutan CO (K = 4)
 
 <!-- Gambar Screenshot Scatter Plot CO dari KNIME -->
-![Visualisasi Scatter Plot Hasil Clustering K-Means (CO)](./img/clustering_polutan/scatter_plot_CO.png)
+![Visualisasi Scatter Plot Hasil Clustering K-Means (CO)](clustering_polutan/plot_co.png)
 
 Hasil pengelompokan untuk polutan **$\text{CO}$** menghasilkan $K=4$ kluster optimal (`cluster_0` hingga `cluster_3`). Jumlah kluster yang lebih sedikit menunjukkan bahwa variasi penyebaran emisi Karbon Monoksida antar-wilayah cenderung lebih homogen dibandingkan $\text{NO}_2$.
 
@@ -459,7 +459,7 @@ Hasil pengelompokan untuk polutan **$\text{CO}$** menghasilkan $K=4$ kluster opt
 ### 3.3 Polutan SO2 (K = 6)
 
 <!-- Gambar Screenshot Scatter Plot SO2 dari KNIME -->
-![Visualisasi Scatter Plot Hasil Clustering K-Means (SO2)](./img/clustering_polutan/scatter_plot_SO2.png)
+![Visualisasi Scatter Plot Hasil Clustering K-Means (SO2)](clustering_polutan/plot_so2.png)
 
 Untuk polutan **$\text{SO}_2$**, algoritma K-Means membagi data menjadi 6 kelompok (`cluster_0` hingga `cluster_5`), mencerminkan kompleksitas dan variabilitas tinggi dari pencemaran Sulfur Dioksida.
 
