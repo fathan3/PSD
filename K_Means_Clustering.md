@@ -420,63 +420,63 @@ Name: count, dtype: int64
 
 Selain eksekusi berbasis skrip Python, pengolahan *clustering* juga dirancang secara visual menggunakan perangkat lunak **KNIME Analytics Platform** untuk memastikan transparansi alur kerja pemrosesan data.
 
-<!-- Gambar Screenshot Workflow KNIME (Ubah path/nama file gambar di bawah ini jika sesuai) -->
 ![Visualisasi Alur Kerja (Workflow) K-Means pada KNIME](clustering_polutan/alur.png)
 
-Berdasarkan struktur diagram *workflow* KNIME yang dibangun, berikut adalah uraian fungsional dari setiap komponen node utama:
+Berdasarkan struktur diagram *workflow* KNIME di atas, pemrosesan data dilakukan melalui 3 jalur paralel (masing-masing untuk polutan $\text{NO}_2$, $\text{CO}$, dan $\text{SO}_2$) dari satu titik sumber basis data utama:
 
-1. **PostgreSQL Connector $\rightarrow$ DB Table Selector $\rightarrow$ DB Reader**:
-   Rangkaian node ini bertindak sebagai pintu masuk data (*ingestion*). Node ini menginisialisasi koneksi aman ke basis data PostgreSQL, memilih tabel tempat penyimpanan fitur-fitur deret waktu hasil ekstraksi TSFEL, dan membaca dataset secara efisien ke dalam lingkungan kerja KNIME.
+1. **MySQL Connector $\rightarrow$ DB Table Selector $\rightarrow$ DB Reader**:
+   Konektor utama menggunakan node **MySQL Connector** untuk menghubungkan KNIME ke basis data MySQL server. Alur kemudian terbagi menjadi 3 cabang paralel:
+   - Cabang 1: **NO2 DB Table Selector** $\rightarrow$ **DB Reader** untuk membaca data fitur $\text{NO}_2$.
+   - Cabang 2: **CO DB Table Selector** $\rightarrow$ **DB Reader** untuk membaca data fitur $\text{CO}$.
+   - Cabang 3: **SO2 DB Table Selector** $\rightarrow$ **DB Reader** untuk membaca data fitur $\text{SO}_2$.
 
 2. **PCA (Principal Component Analysis)**:
-   Karena proses ekstraksi deret waktu menghasilkan puluhan kolom fitur statistik, temporal, dan spektral (dimensi tinggi), node PCA bertugas menyederhanakan ruang fitur. PCA memproyeksikan kombinasi linier dari fitur-fitur asli ke dalam komponen utama (*Principal Components*) dengan mempertahankan tingkat varians maksimum. Hal ini mencegah efek kendala dimensi (*Curse of Dimensionality*) serta mempercepat komputasi pengelompokan.
+   Masing-masing cabang mengalirkan data ke node **PCA** untuk mereduksi dimensi matriks fitur deret waktu TSFEL yang kompleks menjadi komponen utama (*Principal Components*) tanpa mengabaikan informasi varians penting.
 
 3. **k-Means**:
-   Merupakan inti algoritma *Unsupervised Learning* yang bertugas mengelompokkan observasi wilayah. Node ini menghitung kedekatan jarak Euclidean pada ruang komponen PCA, membagi wilayah-wilayah ke dalam $K$ kelompok berdasarkan pola kesamaan polusi.
+   Node **k-Means** pada setiap jalur mengeksekusi algoritma *Unsupervised Learning* untuk mengelompokkan wilayah-wilayah berdasarkan kedekatan jarak matematis fitur PCA yang dihasilkan.
 
 4. **Scatter Plot**:
-   Node visualisasi interaktif untuk menampilkan titik-titik persebaran wilayah terhadap kluster yang ditetapkan, mempermudah inspeksi spasial dan analisis komparatif antar-daerah.
+   Node **Scatter Plot** di ujung setiap rantai berfungsi memvisualisasikan titik persebaran sampel data terhadap kelompok (*cluster*) yang terbentuk secara interaktif.
 
 ---
 
 ## 3. Interpretasi Hasil Clustering (Scatter Plot KNIME)
 
-Berikut adalah sajian visualisasi *Scatter Plot* hasil *Clustering K-Means* dari platform KNIME beserta analisis interpretatif untuk masing-masing polutan ($\text{NO}_2$, $\text{CO}$, dan $\text{SO}_2$).
+Berikut adalah visualisasi *Scatter Plot* hasil *Clustering K-Means* dari platform KNIME untuk masing-masing polutan ($\text{NO}_2$, $\text{CO}$, dan $\text{SO}_2$) beserta analisis deskriptif yang disesuaikan secara presisi dengan tampilan grafik fisik.
 
-### 3.1 Polutan NO2 (K = 6)
+### 3.1 Polutan NO2 (K = 3)
 
-<!-- Gambar Screenshot Scatter Plot NO2 dari KNIME -->
 ![Visualisasi Scatter Plot Hasil Clustering K-Means (NO2)](clustering_polutan/plot_no2.png)
 
-Berdasarkan pemetaan grafik scatter untuk polutan **$\text{NO}_2$**, pembagian kluster memisahkan data ke dalam 6 kelompok (`cluster_0` hingga `cluster_5`). Beberapa temuan penting dari distribusi pola ini antara lain:
+Berdasarkan visualisasi grafik *Scatter Plot* KNIME untuk polutan **$\text{NO}_2$**, algoritma K-Means membagi titik-titik data ke dalam **3 kelompok utama (`cluster_0`, `cluster_1`, dan `cluster_2`)**:
 
-- **Persebaran Multipel pada Satu Daerah**: Beberapa titik observasi dalam satu wilayah terdistribusi di lebih dari satu kluster. Hal ini mengindikasikan adanya dinamika perubahan pola emisi $\text{NO}_2$ antartertentu (misalnya perbedaan antar-minggu atau antar-bulan) sehingga karakteristiknya bergeser mengikuti profil kelompok yang berbeda.
-- **Dominasi Kluster Utama (`cluster_4`)**: Mayoritas wilayah observasi berkumpul secara signifikan pada `cluster_4`. Hal ini menunjukkan adanya profil baseline umum dari konsentrasi $\text{NO}_2$ yang dialami sebagian besar kawasan perkotaan.
-- **Anomali Wilayah Terisolasi (`cluster_5`)**: `cluster_5` tampak terpisah secara ekstrem dan hanya ditempati oleh sampel dari titik observasi spesifik (seperti area Kamal/Banyuajuh). Kondisi ini menandakan keberadaan aktivitas sumber emisi lokal yang sangat unik dan berbeda dari wilayah lainnya.
-- **Kedekatan Pola Minor (`cluster_3`)**: Wilayah seperti Cerme dan Widodaren memperlihatkan tren pencemaran $\text{NO}_2$ yang serupa sehingga konsisten dikelompokkan ke dalam `cluster_3`.
+- **Dominasi Kelompok Utama (`cluster_0`)**: Sebagian besar sampel wilayah berkumpul secara rapat pada `cluster_0`. Hal ini menunjukkan adanya pola konsentrasi emisi $\text{NO}_2$ baseline/standar yang dialami oleh mayoritas kawasan observasi.
+- **Kelompok Fluktuasi Menengah (`cluster_1`)**: Terdapat sekelompok sampel wilayah yang terpisah ke dalam `cluster_1`, mencerminkan karakteristik dinamika $\text{NO}_2$ dengan tingkat fluktuasi menengah.
+- **Anomali / Outlier Terisolasi (`cluster_2`)**: `cluster_2` hanya diisi oleh 1 titik sampel spesifik yang berada terisolasi di bagian bawah grafik. Hal ini menandakan adanya perbedaan nilai fitur polutan $\text{NO}_2$ yang sangat ekstrem dan signifikan dibandingkan sampel wilayah lainnya.
 
 ---
 
-### 3.2 Polutan CO (K = 4)
+### 3.2 Polutan CO (K = 3)
 
-<!-- Gambar Screenshot Scatter Plot CO dari KNIME -->
 ![Visualisasi Scatter Plot Hasil Clustering K-Means (CO)](clustering_polutan/plot_co.png)
 
-Hasil pengelompokan untuk polutan **$\text{CO}$** menghasilkan $K=4$ kluster optimal (`cluster_0` hingga `cluster_3`). Jumlah kluster yang lebih sedikit menunjukkan bahwa variasi penyebaran emisi Karbon Monoksida antar-wilayah cenderung lebih homogen dibandingkan $\text{NO}_2$.
+Untuk polutan **$\text{CO}$**, pembagian kluster pada hasil pemetaan KNIME juga terbagi ke dalam **3 kelompok (`cluster_0`, `cluster_1`, dan `cluster_2`)**:
 
-- **Dominasi Kluster Standar (`cluster_0`)**: Sebagian besar wilayah pengamatan terkelompokkan dalam `cluster_0`. Tren fluktuasi gas $\text{CO}$ pada kawasan ini mencerminkan kondisi paparan emisi udara harian yang relatif teratur dan stabil.
-- **Karakteristik Spesifik Wilayah Industri/Pelabuhan**: Titik observasi kawasan pelabuhan/pesisir (seperti Kamal, Banyuajuh, Bangkalan) terpisah ke dalam kelompok tersendiri (`cluster_1` dan `cluster_2`). Temuan ini memperkuat dugaan tingginya emisi spesifik dari aktivitas transportasi laut maupun kawasan industri setempat.
-- **Pengelompokan Wilayah Marginal (`cluster_3`)**: Kawasan seperti Cerme, Wonoayu, dan Kalianget menunjukkan kemiripan pola fluktuasi minor $\text{CO}$ sehingga menempati kelompok `cluster_3`.
+- **Dominasi Kelompok Atas (`cluster_2`)**: `cluster_2` menjadi kelompok yang paling mendominasi, menampung hampir seluruh titik data sampel wilayah di bagian atas grafik. Ini mengindikasikan homogenitas tren emisi Karbon Monoksida pada mayoritas titik pengamatan.
+- **Outlier Terisolasi Pertama (`cluster_0`)**: Terlihat 1 titik data di bagian tengah sebelah kanan yang terpisah masuk ke dalam `cluster_0`.
+- **Outlier Terisolasi Kedua (`cluster_1`)**: Terlihat 1 titik data di bagian kanan bawah yang menempati `cluster_1` secara tersendiri, menunjukkan sifat anomali emisi Karbon Monoksida yang khas pada titik pengamatan tersebut.
 
 ---
 
-### 3.3 Polutan SO2 (K = 6)
+### 3.3 Polutan SO2 (K = 3)
 
-<!-- Gambar Screenshot Scatter Plot SO2 dari KNIME -->
 ![Visualisasi Scatter Plot Hasil Clustering K-Means (SO2)](clustering_polutan/plot_so2.png)
 
-Untuk polutan **$\text{SO}_2$**, algoritma K-Means membagi data menjadi 6 kelompok (`cluster_0` hingga `cluster_5`), mencerminkan kompleksitas dan variabilitas tinggi dari pencemaran Sulfur Dioksida.
+Hasil visualisasi grafik *Scatter Plot* untuk polutan **$\text{SO}_2$** memperlihatkan struktur pengelompokan ke dalam **3 kelompok (`cluster_0`, `cluster_1`, dan `cluster_2`)**:
 
-- **Dua Profil Dominan (`cluster_1` & `cluster_4`)**: Distribusi wilayah terbagi utama ke dalam dua kelompok besar, yakni `cluster_1` (misalnya Asemrowo, Jombang, Nganjuk) dan `cluster_4` (Gresik Kota, Cerme, Banyuajuh). Ini menandakan adanya dua jenis pola emisi $\text{SO}_2$ latar belakang yang mendominasi kawasan observasi.
-- **Isolasi Outlier Ekstrem**: Titik observasi khusus di area pelabuhan/industri terkelompok secara terpisah pada `cluster_2` dan `cluster_3`, menandakan adanya lonjakan paparan $\text{SO}_2$ periodik yang tergolong pencilan (*outlier*).
-- **Anomali Tunggal Terisolasi (`cluster_5`)**: Area Wonoayu memperlihatkan kondisi unik di mana titik data berada terisolasi penuh pada `cluster_5`, mengindikasikan kejadian emisi $\text{SO}_2$ terlokalisir yang sangat tajam pada waktu pengamatan tertentu.
+- **Dominasi Kelompok Mayoritas (`cluster_2`)**: Sama seperti pada pola emisi $\text{CO}$, `cluster_2` berada pada bagian atas grafik dan menampung hampir seluruh sampel wilayah observasi, mencerminkan kondisi rata-rata paparan $\text{SO}_2$ yang umum dialami kawasan.
+- **Anomali Terpisah Pertama (`cluster_0`)**: Satu sampel data terlepas dari gerombolan utama dan masuk ke `cluster_0` di bagian tengah grafik.
+- **Anomali Terpisah Kedua (`cluster_1`)**: Satu sampel data terpisah di bagian bawah grafik dan menempati `cluster_1`, mengindikasikan adanya pencilan konsentrasi Sulfur Dioksida yang tajam pada lokasi observasi spesifik tersebut.
+
+
