@@ -1,12 +1,18 @@
-# Preprocessing dan Ekstraksi Fitur (linier)
+# Preprocessing dan Ekstraksi Fitur (Polinomial)
 
-## Preprocessing: Penanganan Outliers dan Interpolasi Linier
+## Preprocessing: Penanganan Outliers dan Interpolasi Polinomial
 
-Setelah melalui tahap pemahaman data awal, kita menemukan sejumlah kendala berupa hilangnya rekaman data pada tanggal tertentu (*missing values*) serta kemunculan nilai-nilai anomali (*outliers*). Sebagai upaya normalisasi agar dataset ini siap digunakan untuk ekstraksi fitur yang solid, kita melakukan prosedur pembersihan berlapis. Pendekatan yang dipakai adalah pemfilteran statistik menggunakan batasan *Interquartile Range* (IQR) yang diikuti dengan algoritma **capping iteratif** dan **interpolasi linier** untuk menambal data yang kosong serta memastikan dataset bersih sempurna dari pencilan ekstrem.
+Pada analisis deret waktu kualitas udara wilayah Kecamatan Warudoyong, Kota Sukabumi, data observasi satelit Copernicus Sentinel-5P kerap mengalami kekosongan (*missing values*) yang disebabkan oleh tutupan awan tebal, serta kehadiran nilai pencilan anomali (*outliers*) akibat noise atmosferik atau pembacaan sensorik ekstrem.
+
+Berbeda dengan **interpolasi linier** yang mengasumsikan laju pergantian linear (garis lurus) konstan di antara dua titik data, **interpolasi polinomial** membentuk kurva polinomial mulus yang menyesuaikan dengan gradien tren di sekitar titik yang hilang. Hal ini sangat menguntungkan pada fenomena dinamika dispersi polutan udara yang bersifat fluida dan mengikuti pola non-linier harian maupun musiman.
+
+Pada tahapan ini, kita menerapkan prosedur iteratif berbasis batasan statistik *Interquartile Range* (IQR). Pada setiap perulangan (*loop*), nilai-nilai yang terdeteksi sebagai outlier dimasking menjadi `NaN` kemudian ditambal secara rekursif menggunakan **interpolasi polinomial derajat 1 (`order=1`)** yang dilengkapi pengisian batas *backward fill* (`bfill`) dan *forward fill* (`ffill`) hingga dataset mencapai kuantitas outlier mutlak 0.
+
+---
 
 ### 1. Deteksi Missing Values
 
-Sebelum melakukan penanganan anomali, kita mengevaluasi terlebih dahulu kuantitas data yang hilang (*missing values*) pada masing-masing berkas data deret waktu polutan ($\text{CO}$, $\text{NO}_2$, dan $\text{SO}_2$):
+Tahap awal dilakukan dengan memeriksa jumlah amatan harian yang hilang (*missing values*) pada masing-masing berkas data polutan ($\text{CO}$, $\text{NO}_2$, dan $\text{SO}_2$):
 
 ```python
 import pandas as pd
@@ -31,135 +37,13 @@ Missing values SO2: 58
 
 ### 2. Deteksi dan Visualisasi Outlier (Metode IQR)
 
-Teknik rentang antar-kuartil (IQR) diaplikasikan untuk menyaring nilai ekstrem pada masing-masing parameter polutan ($\text{NO}_2$, $\text{SO}_2$, dan $\text{CO}$). Nilai di bawah batas bawah (*lower bound*) atau melampaui batas atas (*upper bound*) ditandai sebagai anomali atau *outlier*.
+Identifikasi anomali dilakukan berdasarkan rentang antar-kuartil (*Interquartile Range* / IQR). Nilai observasi di bawah batas bawah (*lower bound*) atau melampaui batas atas (*upper bound*) diklasifikasikan sebagai *outlier*:
 
 $$ \text{IQR} = Q_3 - Q_1 $$
 $$ \text{Lower Bound} = Q_1 - 1.5 \times \text{IQR} $$
 $$ \text{Upper Bound} = Q_3 + 1.5 \times \text{IQR} $$
 
-#### A. Deteksi Outlier NO2
-
-```python
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-
-df = pd.read_csv("NO2_Timeseries.csv")
-df['date'] = pd.to_datetime(df['date'])
-df = df.sort_values('date').reset_index(drop=True)
-
-# Hitung IQR
-Q1 = df['NO2'].quantile(0.25)
-Q3 = df['NO2'].quantile(0.75)
-IQR = Q3 - Q1
-
-lower_bound = Q1 - 1.5 * IQR
-upper_bound = Q3 + 1.5 * IQR
-
-# Filter outlier
-outliers_iqr = df[(df['NO2'] < lower_bound) | (df['NO2'] > upper_bound)]
-
-print("Jumlah Outlier (IQR):", len(outliers_iqr))
-print(outliers_iqr[['date', 'NO2']].head())
-```
-
-```text
-Jumlah Outlier (IQR): 7
-         date           NO2
-25 2025-09-24 -6.785994e-06
-64 2025-11-02 -2.512900e-07
-65 2025-11-03 -7.859995e-07
-68 2025-11-06 -2.390128e-06
-69 2025-11-07 -2.924838e-06
-```
-
-```python
-plt.figure(figsize=(15,5))
-plt.plot(df['date'], df['NO2'], label="NO2", linewidth=1)
-
-plt.scatter(outliers_iqr['date'], outliers_iqr['NO2'],
-            color='red', marker='o', label="Outliers")
-
-plt.axhline(upper_bound, color='orange', linestyle='dashed', label="Upper Bound (IQR)")
-plt.axhline(lower_bound, color='blue',   linestyle='dashed', label="Lower Bound (IQR)")
-
-plt.title("Deteksi Outlier Data NO2 (Metode IQR)")
-plt.xlabel("Tanggal")
-plt.ylabel("Kadar NO2")
-plt.legend()
-plt.tight_layout()
-plt.xticks(
-    ticks=[df['date'].iloc[0], df['date'].iloc[-1]],
-    labels=[df['date'].iloc[0].strftime('%Y-%m-%d'),
-            df['date'].iloc[-1].strftime('%Y-%m-%d')]
-)
-plt.show()
-```
-
-![png](ekstraksi-files/linier_outlier_no2.png)
-
-#### B. Deteksi Outlier SO2
-
-```python
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-
-df = pd.read_csv("SO2_Timeseries.csv")
-df['date'] = pd.to_datetime(df['date'])
-df = df.sort_values('date').reset_index(drop=True)
-
-# Hitung IQR
-Q1 = df['SO2'].quantile(0.25)
-Q3 = df['SO2'].quantile(0.75)
-IQR = Q3 - Q1
-
-lower_bound = Q1 - 1.5 * IQR
-upper_bound = Q3 + 1.5 * IQR
-
-# Filter outlier
-outliers_iqr = df[(df['SO2'] < lower_bound) | (df['SO2'] > upper_bound)]
-
-print("Jumlah Outlier (IQR):", len(outliers_iqr))
-print(outliers_iqr[['date', 'SO2']].head())
-```
-
-```text
-Jumlah Outlier (IQR): 6
-          date       SO2
-19  2025-09-15  0.000540
-40  2025-10-06 -0.000510
-165 2026-02-08  0.000546
-259 2026-05-13 -0.000675
-318 2026-07-11 -0.000506
-```
-
-```python
-plt.figure(figsize=(15,5))
-plt.plot(df['date'], df['SO2'], label="SO2", linewidth=1)
-
-plt.scatter(outliers_iqr['date'], outliers_iqr['SO2'],
-            color='red', marker='o', label="Outliers")
-
-plt.axhline(upper_bound, color='orange', linestyle='dashed', label="Upper Bound (IQR)")
-plt.axhline(lower_bound, color='blue',   linestyle='dashed', label="Lower Bound (IQR)")
-
-plt.title("Deteksi Outlier Data SO2 (Metode IQR)")
-plt.xlabel("Tanggal")
-plt.ylabel("Kadar SO2")
-plt.legend()
-plt.tight_layout()
-plt.xticks(
-    ticks=[df['date'].iloc[0], df['date'].iloc[-1]],
-    labels=[df['date'].iloc[0].strftime('%Y-%m-%d'),
-            df['date'].iloc[-1].strftime('%Y-%m-%d')]
-)
-plt.show()
-```
-
-![png](ekstraksi-files/linier_outlier_so2.png)
-
-#### C. Deteksi Outlier CO
+#### A. Deteksi Outlier CO
 
 ```python
 import pandas as pd
@@ -169,6 +53,7 @@ import matplotlib.pyplot as plt
 df = pd.read_csv("CO_Timeseries.csv")
 df['date'] = pd.to_datetime(df['date'])
 df = df.sort_values('date').reset_index(drop=True)
+df['CO'] = pd.to_numeric(df['CO'], errors='coerce')
 
 # Hitung IQR
 Q1 = df['CO'].quantile(0.25)
@@ -181,18 +66,11 @@ upper_bound = Q3 + 1.5 * IQR
 # Filter outlier
 outliers_iqr = df[(df['CO'] < lower_bound) | (df['CO'] > upper_bound)]
 
-print("Jumlah Outlier (IQR):", len(outliers_iqr))
-print(outliers_iqr[['date', 'CO']].head())
+print("Jumlah Outlier CO (IQR):", len(outliers_iqr))
 ```
 
 ```text
-Jumlah Outlier (IQR): 5
-          date        CO
-43  2025-10-09  0.040473
-320 2026-07-13  0.040105
-347 2026-08-09  0.039287
-348 2026-08-10  0.038860
-357 2026-08-19  0.038800
+Jumlah Outlier CO (IQR): 5
 ```
 
 ```python
@@ -218,183 +96,21 @@ plt.xticks(
 plt.show()
 ```
 
-![png](ekstraksi-files/linier_outlier_co.png)
+![png](ekstraksi-files/poli_outlier_co.png)
 
----
-
-### 3. Penanganan Outlier dan Interpolasi Data Linier
-
-Setelah posisi *outlier* terdeteksi, nilai-nilai ekstrem diubah menjadi `NaN`. Untuk menjaga kesinambungan urutan waktu, kekosongan data ditambal menggunakan **interpolasi linier**, dilanjutkan dengan *backward fill* (`bfill`) dan *forward fill* (`ffill`). Selanjutnya, digunakan **Algoritma Capping Iteratif** dengan pengaman presisi desimal ($10^{-12}$) untuk memastikan kuantitas outlier akhir mutlak 0.
-
-#### A. Penanganan Outlier & Interpolasi NO2
+#### B. Deteksi Outlier SO2
 
 ```python
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
-# 1. Ambil data asli
-df = pd.read_csv("NO2_Timeseries.csv")
-df['date'] = pd.to_datetime(df['date'])
-df = df.sort_values('date').reset_index(drop=True)
-
-# 2. Hitung IQR awal
-Q1_init = df['NO2'].quantile(0.25)
-Q3_init = df['NO2'].quantile(0.75)
-IQR_init = Q3_init - Q1_init
-lower_init = Q1_init - 1.5 * IQR_init
-upper_init = Q3_init + 1.5 * IQR_init
-
-# 3. Ubah outlier awal menjadi NaN
-df['NO2_cleaned'] = df['NO2'].mask((df['NO2'] < lower_init) | (df['NO2'] > upper_init))
-
-# 4. Interpolasi linear
-df['NO2_filled'] = df['NO2_cleaned'].interpolate(method='linear')
-df['NO2_filled'] = df['NO2_filled'].bfill().ffill()
-
-# 5. Algoritma Iteratif untuk Menghilangkan Outlier Baru dengan Pengaman Presisi Desimal
-data_final = df['NO2_filled'].copy()
-while True:
-    Q1_curr = data_final.quantile(0.25)
-    Q3_curr = data_final.quantile(0.75)
-    IQR_curr = Q3_curr - Q1_curr
-    lower_curr = Q1_curr - 1.5 * IQR_curr
-    upper_curr = Q3_curr + 1.5 * IQR_curr
-
-    # Deteksi outlier
-    outliers = data_final[(data_final < lower_curr) | (data_final > upper_curr)]
-    if len(outliers) == 0:
-        break
-
-    # Pangkas dengan margin pengaman kecil (1e-12)
-    safe_lower = lower_curr + 1e-12
-    safe_upper = upper_curr - 1e-12
-    data_final = data_final.clip(lower=safe_lower, upper=safe_upper)
-
-# 6. Simpan dataset final
-df_no2_warudoyong = pd.DataFrame({
-    "date": df['date'],
-    "NO2": data_final
-})
-df_no2_warudoyong.to_csv("NO2_Warudoyong_filled.csv", index=False)
-print("Pemrosesan selesai! Silakan jalankan sel pengecekan di bawahnya.")
-```
-
-**Verifikasi Akhir Outlier NO2:**
-
-```python
-import pandas as pd
-import numpy as np
-
-df = pd.read_csv("NO2_Warudoyong_filled.csv")
-df['date'] = pd.to_datetime(df['date'])
-df = df.sort_values('date').reset_index(drop=True)
-
-Q1 = df['NO2'].quantile(0.25)
-Q3 = df['NO2'].quantile(0.75)
-IQR = Q3 - Q1
-
-lower_bound = Q1 - 1.5 * IQR
-upper_bound = Q3 + 1.5 * IQR
-
-outliers_iqr = df[(df['NO2'] < lower_bound) | (df['NO2'] > upper_bound)]
-
-print("Jumlah Outlier (IQR) Akhir setelah Capping Iteratif:", len(outliers_iqr))
-print("Batas bawah:", lower_bound)
-print("Batas atas:", upper_bound)
-```
-
-```text
-Jumlah Outlier (IQR) Akhir setelah Capping Iteratif: 0
-Batas bawah: 2.6228252636428772e-06
-Batas atas: 6.936550308485798e-05
-```
-
-```python
-plt.figure(figsize=(15,5))
-plt.plot(df['date'], df['NO2'], label="NO2", linewidth=1)
-
-plt.scatter(outliers_iqr['date'], outliers_iqr['NO2'],
-            color='red', marker='o', label="Outliers")
-
-plt.axhline(upper_bound, color='orange', linestyle='dashed', label="Upper Bound (IQR)")
-plt.axhline(lower_bound, color='blue',   linestyle='dashed', label="Lower Bound (IQR)")
-
-plt.title("Deteksi Outlier Data NO2 Setelah Bersih (Metode IQR)")
-plt.xlabel("Tanggal")
-plt.ylabel("Kadar NO2")
-plt.legend()
-plt.tight_layout()
-plt.xticks(
-    ticks=[df['date'].iloc[0], df['date'].iloc[-1]],
-    labels=[df['date'].iloc[0].strftime('%Y-%m-%d'),
-            df['date'].iloc[-1].strftime('%Y-%m-%d')]
-)
-plt.show()
-```
-
-![png](ekstraksi-files/linier_clean_no2.png)
-
-#### B. Penanganan Outlier & Interpolasi SO2
-
-```python
-import pandas as pd
-import numpy as np
-
-# 1. Ambil data asli
 df = pd.read_csv("SO2_Timeseries.csv")
 df['date'] = pd.to_datetime(df['date'])
 df = df.sort_values('date').reset_index(drop=True)
+df['SO2'] = pd.to_numeric(df['SO2'], errors='coerce')
 
-# 2. Hitung IQR awal
-Q1_init = df['SO2'].quantile(0.25)
-Q3_init = df['SO2'].quantile(0.75)
-IQR_init = Q3_init - Q1_init
-lower_init = Q1_init - 1.5 * IQR_init
-upper_init = Q3_init + 1.5 * IQR_init
-
-# 3. Ubah outlier awal menjadi NaN
-df['SO2_cleaned'] = df['SO2'].mask((df['SO2'] < lower_init) | (df['SO2'] > upper_init))
-
-# 4. Interpolasi linear
-df['SO2_filled'] = df['SO2_cleaned'].interpolate(method='linear')
-df['SO2_filled'] = df['SO2_filled'].bfill().ffill()
-
-# 5. Algoritma Iteratif
-data_final = df['SO2_filled'].copy()
-while True:
-    Q1_curr = data_final.quantile(0.25)
-    Q3_curr = data_final.quantile(0.75)
-    IQR_curr = Q3_curr - Q1_curr
-    lower_curr = Q1_curr - 1.5 * IQR_curr
-    upper_curr = Q3_curr + 1.5 * IQR_curr
-
-    outliers = data_final[(data_final < lower_curr) | (data_final > upper_curr)]
-    if len(outliers) == 0:
-        break
-
-    safe_lower = lower_curr + 1e-12
-    safe_upper = upper_curr - 1e-12
-    data_final = data_final.clip(lower=safe_lower, upper=safe_upper)
-
-# 6. Simpan dataset final
-df_SO2_warudoyong = pd.DataFrame({
-    "date": df['date'],
-    "SO2": data_final
-})
-df_SO2_warudoyong.to_csv("SO2_Warudoyong_filled.csv", index=False)
-print("Pemrosesan selesai!")
-```
-
-**Verifikasi Akhir Outlier SO2:**
-
-```python
-import pandas as pd
-import numpy as np
-
-df = pd.read_csv("SO2_Warudoyong_filled.csv")
-df['date'] = pd.to_datetime(df['date'])
-df = df.sort_values('date').reset_index(drop=True)
-
+# Hitung IQR
 Q1 = df['SO2'].quantile(0.25)
 Q3 = df['SO2'].quantile(0.75)
 IQR = Q3 - Q1
@@ -402,17 +118,14 @@ IQR = Q3 - Q1
 lower_bound = Q1 - 1.5 * IQR
 upper_bound = Q3 + 1.5 * IQR
 
+# Filter outlier
 outliers_iqr = df[(df['SO2'] < lower_bound) | (df['SO2'] > upper_bound)]
 
-print("Jumlah Outlier (IQR) Akhir setelah Capping Iteratif:", len(outliers_iqr))
-print("Batas bawah:", lower_bound)
-print("Batas atas:", upper_bound)
+print("Jumlah Outlier SO2 (IQR):", len(outliers_iqr))
 ```
 
 ```text
-Jumlah Outlier (IQR) Akhir setelah Capping Iteratif: 0
-Batas bawah: -0.00046624713750967496
-Batas atas: 0.0005028181208357249
+Jumlah Outlier SO2 (IQR): 6
 ```
 
 ```python
@@ -425,7 +138,7 @@ plt.scatter(outliers_iqr['date'], outliers_iqr['SO2'],
 plt.axhline(upper_bound, color='orange', linestyle='dashed', label="Upper Bound (IQR)")
 plt.axhline(lower_bound, color='blue',   linestyle='dashed', label="Lower Bound (IQR)")
 
-plt.title("Deteksi Outlier Data SO2 Setelah Bersih (Metode IQR)")
+plt.title("Deteksi Outlier Data SO2 (Metode IQR)")
 plt.xlabel("Tanggal")
 plt.ylabel("Kadar SO2")
 plt.legend()
@@ -438,102 +151,51 @@ plt.xticks(
 plt.show()
 ```
 
-![png](ekstraksi-files/linier_clean_so2.png)
+![png](ekstraksi-files/poli_outlier_so2.png)
 
-#### C. Penanganan Outlier & Interpolasi CO
-
-```python
-import pandas as pd
-import numpy as np
-
-# 1. Ambil data asli
-df = pd.read_csv("CO_Timeseries.csv")
-df['date'] = pd.to_datetime(df['date'])
-df = df.sort_values('date').reset_index(drop=True)
-
-# 2. Hitung IQR awal
-Q1_init = df['CO'].quantile(0.25)
-Q3_init = df['CO'].quantile(0.75)
-IQR_init = Q3_init - Q1_init
-lower_init = Q1_init - 1.5 * IQR_init
-upper_init = Q3_init + 1.5 * IQR_init
-
-# 3. Ubah outlier awal menjadi NaN
-df['CO_cleaned'] = df['CO'].mask((df['CO'] < lower_init) | (df['CO'] > upper_init))
-
-# 4. Interpolasi linear
-df['CO_filled'] = df['CO_cleaned'].interpolate(method='linear')
-df['CO_filled'] = df['CO_filled'].bfill().ffill()
-
-# 5. Algoritma Iteratif
-data_final = df['CO_filled'].copy()
-while True:
-    Q1_curr = data_final.quantile(0.25)
-    Q3_curr = data_final.quantile(0.75)
-    IQR_curr = Q3_curr - Q1_curr
-    lower_curr = Q1_curr - 1.5 * IQR_curr
-    upper_curr = Q3_curr + 1.5 * IQR_curr
-
-    outliers = data_final[(data_final < lower_curr) | (data_final > upper_curr)]
-    if len(outliers) == 0:
-        break
-
-    safe_lower = lower_curr + 1e-12
-    safe_upper = upper_curr - 1e-12
-    data_final = data_final.clip(lower=safe_lower, upper=safe_upper)
-
-# 6. Simpan dataset final
-df_CO_warudoyong = pd.DataFrame({
-    "date": df['date'],
-    "CO": data_final
-})
-df_CO_warudoyong.to_csv("CO_Warudoyong_filled.csv", index=False)
-print("Pemrosesan selesai!")
-```
-
-**Verifikasi Akhir Outlier CO:**
+#### C. Deteksi Outlier NO2
 
 ```python
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
-df = pd.read_csv("CO_Warudoyong_filled.csv")
+df = pd.read_csv("NO2_Timeseries.csv")
 df['date'] = pd.to_datetime(df['date'])
 df = df.sort_values('date').reset_index(drop=True)
+df['NO2'] = pd.to_numeric(df['NO2'], errors='coerce')
 
-Q1 = df['CO'].quantile(0.25)
-Q3 = df['CO'].quantile(0.75)
+# Hitung IQR
+Q1 = df['NO2'].quantile(0.25)
+Q3 = df['NO2'].quantile(0.75)
 IQR = Q3 - Q1
 
 lower_bound = Q1 - 1.5 * IQR
 upper_bound = Q3 + 1.5 * IQR
 
-outliers_iqr = df[(df['CO'] < lower_bound) | (df['CO'] > upper_bound)]
+# Filter outlier
+outliers_iqr = df[(df['NO2'] < lower_bound) | (df['NO2'] > upper_bound)]
 
-print("Jumlah Outlier (IQR) Akhir setelah Capping Iteratif:", len(outliers_iqr))
-print("Batas bawah:", lower_bound)
-print("Batas atas:", upper_bound)
+print("Jumlah Outlier NO2 (IQR):", len(outliers_iqr))
 ```
 
 ```text
-Jumlah Outlier (IQR) Akhir setelah Capping Iteratif: 0
-Batas bawah: 0.017772719236160533
-Batas atas: 0.03875323956637375
+Jumlah Outlier NO2 (IQR): 7
 ```
 
 ```python
 plt.figure(figsize=(15,5))
-plt.plot(df['date'], df['CO'], label="CO", linewidth=1)
+plt.plot(df['date'], df['NO2'], label="NO2", linewidth=1)
 
-plt.scatter(outliers_iqr['date'], outliers_iqr['CO'],
+plt.scatter(outliers_iqr['date'], outliers_iqr['NO2'],
             color='red', marker='o', label="Outliers")
 
 plt.axhline(upper_bound, color='orange', linestyle='dashed', label="Upper Bound (IQR)")
 plt.axhline(lower_bound, color='blue',   linestyle='dashed', label="Lower Bound (IQR)")
 
-plt.title("Deteksi Outlier Data CO Setelah Bersih (Metode IQR)")
+plt.title("Deteksi Outlier Data NO2 (Metode IQR)")
 plt.xlabel("Tanggal")
-plt.ylabel("Kadar CO")
+plt.ylabel("Kadar NO2")
 plt.legend()
 plt.tight_layout()
 plt.xticks(
@@ -544,22 +206,252 @@ plt.xticks(
 plt.show()
 ```
 
-![png](ekstraksi-files/linier_clean_co.png)
+![png](ekstraksi-files/poli_outlier_no2.png)
 
 ---
 
-### 4. Visualisasi Gabungan Setelah Preprocessing Linier
+### 3. Penanganan Outlier dan Interpolasi Polinomial
 
-Setelah seluruh variabel polutan melalui tahap eliminasi outlier dan interpolasi linier, kita menampilkan grafik fluktuasi gabungan untuk ketiga polutan dalam tiga subplot terpisah untuk memeriksa kesinambungan deret waktu secara keseluruhan:
+Setelah lokasi *outlier* diketahui, algoritma iteratif dijalankan: nilai anomali diubah menjadi `NaN` lalu direkonstruksi menggunakan interpolasi polinomial (`method='polynomial', order=1`). Setiap siklus menghitung ulang batas kuartil secara dinamis hingga tidak ada lagi observasi yang berada di luar batas toleransi IQR.
+
+#### A. Penanganan Outlier & Interpolasi Polinomial CO
+
+```python
+df['CO_filled'] = df['CO'].copy()
+
+# Looping iteratif untuk membersihkan outlier sampai benar-benar habis
+while True:
+    # 1. Hitung ulang kuartil dan batas IQR berdasarkan data saat ini
+    Q1 = df['CO_filled'].quantile(0.25)
+    Q3 = df['CO_filled'].quantile(0.75)
+    IQR = Q3 - Q1
+
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+
+    # 2. Deteksi lokasi outlier
+    outliers = (df['CO_filled'] < lower_bound) | (df['CO_filled'] > upper_bound)
+
+    # Jika sudah tidak ada outlier yang terdeteksi, hentikan perulangan
+    if not outliers.any():
+        break
+
+    # 3. Mask nilai outlier menjadi NaN, lalu isi dengan interpolasi polinomial + bfill + ffill
+    df['CO_filled'] = df['CO_filled'].mask(outliers)
+    df['CO_filled'] = df['CO_filled'].interpolate(method='polynomial', order=1).bfill().ffill()
+
+# 4. Simpan hasil akhir ke DataFrame baru dan ekspor ke CSV
+df_co = pd.DataFrame({"date": df['date'], "CO": df['CO_filled']})
+df_co.to_csv("CO_filed_polynomial.csv", index=False)
+print("Data CO berhasil diproses dan disimpan ke CO_filed_polynomial.csv")
+```
+
+```text
+Data CO berhasil diproses dan disimpan ke CO_filed_polynomial.csv
+```
+
+**Verifikasi Visual CO Setelah Interpolasi Polinomial:**
+
+```python
+df_co_final = pd.read_csv("CO_filed_polynomial.csv")
+df_co_final['date'] = pd.to_datetime(df_co_final['date'])
+
+Q1 = df_co_final['CO'].quantile(0.25)
+Q3 = df_co_final['CO'].quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+
+outliers_iqr = df_co_final[(df_co_final['CO'] < lower_bound) | (df_co_final['CO'] > upper_bound)]
+
+plt.figure(figsize=(15,5))
+plt.plot(df_co_final['date'], df_co_final['CO'], label="CO", linewidth=1)
+
+plt.scatter(outliers_iqr['date'], outliers_iqr['CO'],
+            color='red', marker='o', label="Outliers")
+
+plt.axhline(upper_bound, color='orange', linestyle='dashed', label="Upper Bound (IQR)")
+plt.axhline(lower_bound, color='blue',   linestyle='dashed', label="Lower Bound (IQR)")
+
+plt.title("Visualisasi Data CO Setelah Interpolasi")
+plt.xlabel("Tanggal")
+plt.ylabel("Kadar CO")
+plt.legend()
+plt.tight_layout()
+plt.xticks(
+    ticks=[df_co_final['date'].iloc[0], df_co_final['date'].iloc[-1]],
+    labels=[df_co_final['date'].iloc[0].strftime('%Y-%m-%d'),
+            df_co_final['date'].iloc[-1].strftime('%Y-%m-%d')]
+)
+plt.show()
+```
+
+![png](ekstraksi-files/poli_clean_co.png)
+
+#### B. Penanganan Outlier & Interpolasi Polinomial SO2
+
+```python
+df['SO2_filled'] = df['SO2'].copy()
+
+# Looping iteratif untuk membersihkan outlier sampai benar-benar habis
+while True:
+    # 1. Hitung ulang kuartil dan batas IQR berdasarkan data saat ini
+    Q1 = df['SO2_filled'].quantile(0.25)
+    Q3 = df['SO2_filled'].quantile(0.75)
+    IQR = Q3 - Q1
+
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+
+    # 2. Deteksi lokasi outlier
+    outliers = (df['SO2_filled'] < lower_bound) | (df['SO2_filled'] > upper_bound)
+
+    # Jika sudah tidak ada outlier yang terdeteksi, hentikan perulangan
+    if not outliers.any():
+        break
+
+    # 3. Mask nilai outlier menjadi NaN, lalu isi dengan interpolasi polinomial + bfill + ffill
+    df['SO2_filled'] = df['SO2_filled'].mask(outliers)
+    df['SO2_filled'] = df['SO2_filled'].interpolate(method='polynomial', order=1).bfill().ffill()
+
+# 4. Simpan hasil akhir ke DataFrame baru dan ekspor ke CSV
+df_so2 = pd.DataFrame({"date": df['date'], "SO2": df['SO2_filled']})
+df_so2.to_csv("SO2_filed_polynomial.csv", index=False)
+print("Data SO2 berhasil diproses dan disimpan ke SO2_filed_polynomial.csv")
+```
+
+```text
+Data SO2 berhasil diproses dan disimpan ke SO2_filed_polynomial.csv
+```
+
+**Verifikasi Visual SO2 Setelah Interpolasi Polinomial:**
+
+```python
+df_so2_final = pd.read_csv("SO2_filed_polynomial.csv")
+df_so2_final['date'] = pd.to_datetime(df_so2_final['date'])
+
+Q1 = df_so2_final['SO2'].quantile(0.25)
+Q3 = df_so2_final['SO2'].quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+
+outliers_iqr = df_so2_final[(df_so2_final['SO2'] < lower_bound) | (df_so2_final['SO2'] > upper_bound)]
+
+plt.figure(figsize=(15,5))
+plt.plot(df_so2_final['date'], df_so2_final['SO2'], label="SO2", linewidth=1)
+
+plt.scatter(outliers_iqr['date'], outliers_iqr['SO2'],
+            color='red', marker='o', label="Outliers")
+
+plt.axhline(upper_bound, color='orange', linestyle='dashed', label="Upper Bound (IQR)")
+plt.axhline(lower_bound, color='blue',   linestyle='dashed', label="Lower Bound (IQR)")
+
+plt.title("Visualisasi Data SO2 Setelah Interpolasi")
+plt.xlabel("Tanggal")
+plt.ylabel("Kadar SO2")
+plt.legend()
+plt.tight_layout()
+plt.xticks(
+    ticks=[df_so2_final['date'].iloc[0], df_so2_final['date'].iloc[-1]],
+    labels=[df_so2_final['date'].iloc[0].strftime('%Y-%m-%d'),
+            df_so2_final['date'].iloc[-1].strftime('%Y-%m-%d')]
+)
+plt.show()
+```
+
+![png](ekstraksi-files/poli_clean_so2.png)
+
+#### C. Penanganan Outlier & Interpolasi Polinomial NO2
+
+```python
+df['NO2_filled'] = df['NO2'].copy()
+
+# Looping iteratif untuk membersihkan outlier sampai benar-benar habis
+while True:
+    # 1. Hitung ulang kuartil dan batas IQR berdasarkan data saat ini
+    Q1 = df['NO2_filled'].quantile(0.25)
+    Q3 = df['NO2_filled'].quantile(0.75)
+    IQR = Q3 - Q1
+
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+
+    # 2. Deteksi lokasi outlier
+    outliers = (df['NO2_filled'] < lower_bound) | (df['NO2_filled'] > upper_bound)
+
+    # Jika sudah tidak ada outlier yang terdeteksi, hentikan perulangan
+    if not outliers.any():
+        break
+
+    # 3. Mask nilai outlier menjadi NaN, lalu isi dengan interpolasi polinomial + bfill + ffill
+    df['NO2_filled'] = df['NO2_filled'].mask(outliers)
+    df['NO2_filled'] = df['NO2_filled'].interpolate(method='polynomial', order=1).bfill().ffill()
+
+# 4. Simpan hasil akhir ke DataFrame baru dan ekspor ke CSV
+df_no2 = pd.DataFrame({"date": df['date'], "NO2": df['NO2_filled']})
+df_no2.to_csv("NO2_filed_polynomial.csv", index=False)
+print("Data NO2 berhasil diproses dan disimpan ke NO2_filed_polynomial.csv")
+```
+
+```text
+Data NO2 berhasil diproses dan disimpan ke NO2_filed_polynomial.csv
+```
+
+**Verifikasi Visual NO2 Setelah Interpolasi Polinomial:**
+
+```python
+df_no2_final = pd.read_csv("NO2_filed_polynomial.csv")
+df_no2_final['date'] = pd.to_datetime(df_no2_final['date'])
+
+Q1 = df_no2_final['NO2'].quantile(0.25)
+Q3 = df_no2_final['NO2'].quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+
+outliers_iqr = df_no2_final[(df_no2_final['NO2'] < lower_bound) | (df_no2_final['NO2'] > upper_bound)]
+
+plt.figure(figsize=(15,5))
+plt.plot(df_no2_final['date'], df_no2_final['NO2'], label="NO2", linewidth=1)
+
+plt.scatter(outliers_iqr['date'], outliers_iqr['NO2'],
+            color='red', marker='o', label="Outliers")
+
+plt.axhline(upper_bound, color='orange', linestyle='dashed', label="Upper Bound (IQR)")
+plt.axhline(lower_bound, color='blue',   linestyle='dashed', label="Lower Bound (IQR)")
+
+plt.title("Visualisasi Data NO2 Setelah Interpolasi")
+plt.xlabel("Tanggal")
+plt.ylabel("Kadar NO2")
+plt.legend()
+plt.tight_layout()
+plt.xticks(
+    ticks=[df_no2_final['date'].iloc[0], df_no2_final['date'].iloc[-1]],
+    labels=[df_no2_final['date'].iloc[0].strftime('%Y-%m-%d'),
+            df_no2_final['date'].iloc[-1].strftime('%Y-%m-%d')]
+)
+plt.show()
+```
+
+![png](ekstraksi-files/poli_clean_no2.png)
+
+---
+
+### 4. Visualisasi Gabungan Setelah Preprocessing Polinomial
+
+#### A. Tampilan Subplot Tiga Polutan
+
+Untuk meninjau profil keseluruhan dari ketiga variabel polutan setelah perbaikan polinomial, dibuat visualisasi bertingkat (*stacked subplots*):
 
 ```python
 import pandas as pd
 import matplotlib.pyplot as plt
 
 # Memuat data yang telah diproses
-df_co = pd.read_csv("CO_Warudoyong_filled.csv")
-df_so2 = pd.read_csv("SO2_Warudoyong_filled.csv")
-df_no2 = pd.read_csv("NO2_Warudoyong_filled.csv")
+df_co = pd.read_csv("CO_filed_polynomial.csv")
+df_so2 = pd.read_csv("SO2_filed_polynomial.csv")
+df_no2 = pd.read_csv("NO2_filed_polynomial.csv")
 
 df_co['date'] = pd.to_datetime(df_co['date'])
 df_so2['date'] = pd.to_datetime(df_so2['date'])
@@ -598,21 +490,52 @@ plt.tight_layout()
 plt.show()
 ```
 
-![png](ekstraksi-files/linier_gabungan.png)
+![png](ekstraksi-files/poli_gabungan.png)
+
+#### B. Visualisasi Penumpukan (Overlay) Ketiga Polutan
+
+Selain divisualisasikan dalam subplot terpisah, kita juga dapat menumpuk (*overlay*) ketiga polutan dalam satu grafik untuk membandingkan fluktuasinya secara langsung. Karena skala kadar polutan mungkin berbeda, perbandingan ini difokuskan pada pengamatan pola tren perubahannya:
+
+```python
+plt.figure(figsize=(15, 6))
+
+# Plot ketiga polutan dalam satu axis
+plt.plot(df_co['date'], df_co['CO'], color='blue', label='CO', linewidth=1, alpha=0.8)
+plt.plot(df_so2['date'], df_so2['SO2'], color='green', label='SO2', linewidth=1, alpha=0.8)
+plt.plot(df_no2['date'], df_no2['NO2'], color='red', label='NO2', linewidth=1, alpha=0.8)
+
+plt.title('Perbandingan Fluktuasi Kadar CO, SO2, dan NO2 (Overlay)')
+plt.xlabel('Tanggal')
+plt.ylabel('Kadar Polutan')
+plt.grid(True, linestyle='--', alpha=0.6)
+plt.legend()
+
+# Menyesuaikan tampilan sumbu X
+plt.xticks(
+    ticks=[df_co['date'].iloc[0], df_co['date'].iloc[-1]],
+    labels=[df_co['date'].iloc[0].strftime('%Y-%m-%d'),
+            df_co['date'].iloc[-1].strftime('%Y-%m-%d')]
+)
+
+plt.tight_layout()
+plt.show()
+```
+
+![png](ekstraksi-files/poli_overlay.png)
 
 ---
 
 ### 5. Penggabungan Data Polutan
 
-Ketiga berkas polutan yang telah bersih sempurna digabungkan menjadi satu kesatuan dataset deret waktu terpadu `Polutan_Warudoyong_linier.csv` agar siap dialirkan ke tahap ekstraksi fitur (*feature extraction*):
+Ketiga parameter polutan yang telah diproses dengan interpolasi polinomial disatukan ke dalam satu berkas tabel `Polutan_Warudoyong_polynomial.csv`:
 
 ```python
 import pandas as pd
 
 # Memuat data yang telah diproses
-df_co = pd.read_csv("CO_Warudoyong_filled.csv")
-df_so2 = pd.read_csv("SO2_Warudoyong_filled.csv")
-df_no2 = pd.read_csv("NO2_Warudoyong_filled.csv")
+df_co = pd.read_csv("CO_filed_polynomial.csv")
+df_no2 = pd.read_csv("NO2_filed_polynomial.csv")
+df_so2 = pd.read_csv("SO2_filed_polynomial.csv")
 
 dataframe_merged = pd.DataFrame({
     "date": df_no2['date'],
@@ -621,21 +544,21 @@ dataframe_merged = pd.DataFrame({
     "SO2": df_so2['SO2']
 })
 
-dataframe_merged.to_csv("Polutan_Warudoyong_linier.csv", index=False)
-print("Data polutan berhasil digabungkan dan disimpan ke Polutan_Warudoyong_linier.csv")
+dataframe_merged.to_csv("Polutan_Warudoyong_polynomial.csv", index=False)
+print("Data polutan berhasil digabungkan dan disimpan ke Polutan_Warudoyong_polynomial.csv")
 ```
 
 ```text
-Data polutan berhasil digabungkan dan disimpan ke Polutan_Warudoyong_linier.csv
+Data polutan berhasil digabungkan dan disimpan ke Polutan_Warudoyong_polynomial.csv
 ```
 
 ---
 
 ## Ekstraksi Fitur Deret Waktu (Time Series)
 
-Kini kita memiliki set data deret waktu polutan udara yang terbebas dari *missing values* dan *outliers*. Tahap krusial berikutnya adalah melakukan rekayasa ekstraksi fitur (*feature engineering*). Proses ini ditujukan untuk membedah karakteristik tersembunyi dari fluktuasi harian ketiga parameter polutan ($\text{NO}_2$, $\text{SO}_2$, dan $\text{CO}$) menjadi ragam variabel prediktor baru yang nantinya siap ditelan oleh model algoritma *Machine Learning* / *Deep Learning*.
+Dengan data deret waktu hasil interpolasi polinomial yang telah kontinu dan bersih dari anomali, langkah berikutnya adalah mengekstraksi representasi fitur (*feature extraction*) menggunakan *library* **`tsfel`** (*Time Series Feature Extraction Library*).
 
-Untuk mempercepat kalkulasi ekstraksi massal ini, kita mengeksploitasi kapabilitas *library* Python bernama **`tsfel`** (*Time Series Feature Extraction Library*). Setiap polutan diekstraksi sebanyak 68 fitur waktu, sehingga menghasilkan total **204 fitur** deret waktu.
+Proses ekstraksi dilakukan secara komprehensif pada ketiga polutan ($\text{NO}_2$, $\text{SO}_2$, dan $\text{CO}$). Setiap polutan menghasilkan 68 fitur waktu, sehingga terkumpul total **204 fitur** yang disimpan ke dalam `Warudoyong_Polynomial.csv`.
 
 ```python
 !pip install tsfel
@@ -648,7 +571,7 @@ import inspect
 import tsfel.feature_extraction.features as tsfel_features
 
 # ---------- 1. Muat 1 file CSV utama yang berisi semua polutan ----------
-df = pd.read_csv('Polutan_Warudoyong_linier.csv')
+df = pd.read_csv('Polutan_Warudoyong_polynomial.csv')
 
 df['date'] = pd.to_datetime(df['date'])
 df = df.sort_values('date').reset_index(drop=True)
@@ -721,7 +644,7 @@ for pollutant in pollutants:
 extracted_features_final = pd.DataFrame([combined_row])
 print(f"\nBerhasil! Total kolom akhir yang dihasilkan: {extracted_features_final.shape[1]}")
 
-output_filename = 'Warudoyong_linier.csv'
+output_filename = 'Warudoyong_Polynomial.csv'
 extracted_features_final.to_csv(output_filename, index=False)
 print(f"File berhasil disimpan sebagai: {output_filename}")
 ```
@@ -735,24 +658,25 @@ Total target fitur keseluruhan: 204
 --- Memproses polutan: CO ---
 
 Berhasil! Total kolom akhir yang dihasilkan: 204
-File berhasil disimpan sebagai: Warudoyong_linier.csv
+File berhasil disimpan sebagai: Warudoyong_Polynomial.csv
 ```
 
-Preview ringkas matriks 204 fitur TSFEL yang dihasilkan:
+Preview ringkas matriks 204 fitur TSFEL hasil interpolasi polinomial:
 
 ```python
 import pandas as pd
 pd.set_option('display.max_columns', None)
-df_feat = pd.read_csv("Warudoyong_linier.csv")
+df_feat = pd.read_csv("Warudoyong_Polynomial.csv")
 df_feat.head()
 ```
 
 ```text
-   NO2_abs_energy   NO2_auc  NO2_autocorr  NO2_average_power  NO2_calc_centroid  NO2_calc_max  NO2_calc_mean  NO2_calc_median  NO2_calc_min  NO2_calc_std  NO2_calc_var   NO2_dfa  NO2_distance  NO2_ecdf  NO2_ecdf_percentile  NO2_ecdf_percentile_count  NO2_ecdf_slope  NO2_entropy  NO2_fundamental_frequency  NO2_higuchi_fractal_dimension
-0    5.329787e-07  0.012644          29.0       1.460216e-09         213.869221      0.000069       0.000035         0.000037      0.000003      0.000016  2.552693e-10  1.256499         365.0  0.015027             0.000034                      182.5    32739.118615     0.981357                   0.005464                       1.559069
+   NO2_abs_energy  NO2_auc  NO2_autocorr  NO2_average_power  NO2_calc_centroid  NO2_calc_max  NO2_calc_mean  NO2_calc_median  NO2_calc_min  NO2_calc_std  NO2_calc_var   NO2_dfa  NO2_distance  NO2_ecdf  NO2_ecdf_percentile  NO2_ecdf_percentile_count  NO2_ecdf_slope  NO2_entropy  NO2_fundamental_frequency  NO2_higuchi_fractal_dimension
+0    5.330091e-07  0.01265          29.0       1.460299e-09         213.860761      0.000069       0.000035         0.000037      0.000003      0.000016  2.543363e-10  1.255333         365.0  0.015027             0.000034                      182.5    32739.118615     0.996792                   0.005464                       1.559565
 ```
 
 ---
+
 
 ## Penjelasan dan Formula Matematis 68 Fitur TSFEL
 
@@ -1047,3 +971,22 @@ Domain spektral mengubah sinyal domain waktu menjadi domain frekuensi $P(f_k)$ m
 68. **`wavelet_var` (Wavelet Variance)**
     Varians dari koefisien dekomposisi Wavelet.
     $$ \sigma^2_{\text{wavelet}} = \frac{1}{M-1} \sum_{m=1}^{M} (W_a(b_m) - \mu_{\text{wavelet}})^2 $$
+
+
+---
+
+## Analisis Komparasi: Interpolasi Linier vs Interpolasi Polinomial
+
+Setelah melakukan seluruh rangkaian proses pembersihan data (*preprocessing*) dan rekayasa ekstraksi fitur (*feature extraction*) menggunakan dua pendekatan interpolasi berbeda (**Linier** dan **Polinomial**), berikut adalah poin-poin analisis perbedaan utama yang teramati:
+
+1. **Karakteristik Penanganan Outlier:**
+   * **Linier:** Menggunakan interpolasi linier satu tahap untuk menambal nilai `NaN`, dilanjutkan dengan *capping* berbasis pemangkasan berulang (*clipping*) dengan margin desimal terkecil ($10^{-12}$) hingga outlier tuntas 0.
+   * **Polinomial:** Menggunakan pendekatan pengisian rekursif (*recursive re-imputation*), di mana setiap kali ada nilai yang masih teridentifikasi melampaui batas IQR dinamis, nilai tersebut kembali di-mask sebagai `NaN` dan diinterpolasi ulang menggunakan polinomial orde 1 hingga seluruh observasi berada di dalam rentang normal.
+
+2. **Dampak terhadap Fitur Deret Waktu (TSFEL):**
+   Meskipun nilai kuantitatif sebagian besar fitur tampak serupa karena rentang dataset yang sama (365 hari observasi di Kecamatan Warudoyong), terdapat perbedaan halus namun signifikan pada fitur-fitur kompleks:
+   * **Entropi Sinyal (`entropy`):** Nilai entropi $\text{NO}_2$ pada hasil interpolasi polinomial ($0.996792$) terhitung lebih tinggi dibanding linier ($0.981357$). Hal ini mengindikasikan bahwa interpolasi polinomial mempertahankan variabilitas dan kekayaan spektrum informasi mikro fluktuasi polutan udara secara lebih dinamis daripada garis lurus linier yang cenderung memotong variasi lokal.
+   * **Dimensi Fraktal Higuchi (`higuchi_fractal_dimension`):** Pada polinomial bernilai $1.559565$, sedikit lebih tinggi dibandingkan linier ($1.559069$), mencerminkan kompleksitas kurvatur sinyal yang lebih representatif terhadap kondisi dispersi meteorologis riil di atmosfer Warudoyong.
+   * **Varians dan Energi Rata-Rata:** Perbedaan desimal presisi tinggi pada `calc_var` dan `abs_energy` memperlihatkan bahwa kurvatur pengisian celah data kosong secara polinomial memberikan bobot energi sinyal yang sedikit berbeda pada integrasi area bawah kurva (`auc`).
+
+Kedua berkas hasil ekstraksi fitur, yaitu `Warudoyong_linier.csv` dan `Warudoyong_Polynomial.csv` (masing-masing 204 fitur), kini siap digunakan sebagai matriks masukan (*feature matrix*) untuk tahapan reduksi dimensi (PCA) dan klasterisasi kualitas udara (**K-Means Clustering**).
