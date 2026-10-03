@@ -17,4 +17,5 @@ chapters:
   - file: Preprocessing_dan_Ekstraksi_Fitur_warudoyong
   - file: Preprocessing_dan_Ekstraksi_Fitur_Polinomial_warudoyong
   - file: K_Means_Clustering
+  - file: K_Means_Clustering_Polinomial
 

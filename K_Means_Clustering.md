@@ -1,4 +1,4 @@
-# K-Means Clustering Polutan
+# K-Means Clustering Polutan (linier)
 
 Dokumen ini menjelaskan proses pengelompokan (*clustering*) area berdasarkan tingkat dan karakteristik polutan (khususnya $\text{NO}_2$, $\text{SO}_2$, dan $\text{CO}$). Setelah melakukan ekstraksi fitur (menggunakan TSFEL sejumlah 68 fitur) pada data deret waktu polutan dari berbagai wilayah observasi dan menggabungkannya ke dalam satu matriks fitur, dilakukan reduksi dimensi serta pengelompokan pola.
 

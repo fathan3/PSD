@@ -1047,3 +1047,45 @@ Domain spektral mengubah sinyal domain waktu menjadi domain frekuensi $P(f_k)$ m
 68. **`wavelet_var` (Wavelet Variance)**
     Varians dari koefisien dekomposisi Wavelet.
     $$ \sigma^2_{\text{wavelet}} = \frac{1}{M-1} \sum_{m=1}^{M} (W_a(b_m) - \mu_{\text{wavelet}})^2 $$
+
+---
+
+## Analisis Komparasi: Interpolasi Linier vs Interpolasi Polinomial
+
+Setelah melakukan seluruh rangkaian proses pembersihan data (*preprocessing*) dan rekayasa ekstraksi fitur (*feature extraction*) menggunakan dua pendekatan interpolasi berbeda (**Linier** dan **Polinomial**), berikut adalah poin-poin analisis perbedaan utama yang teramati:
+
+1. **Karakteristik Penanganan Outlier:**
+   * **Linier:** Menggunakan interpolasi linier satu tahap untuk menambal nilai `NaN`, dilanjutkan dengan *capping* berbasis pemangkasan berulang (*clipping*) dengan margin desimal terkecil ($10^{-12}$) hingga outlier tuntas 0.
+   * **Polinomial:** Menggunakan pendekatan pengisian rekursif (*recursive re-imputation*), di mana setiap kali ada nilai yang masih teridentifikasi melampaui batas IQR dinamis, nilai tersebut kembali di-mask sebagai `NaN` dan diinterpolasi ulang menggunakan polinomial orde 1 hingga seluruh observasi berada di dalam rentang normal.
+
+2. **Dampak terhadap Fitur Deret Waktu (TSFEL):**
+   Meskipun nilai kuantitatif sebagian besar fitur tampak serupa karena rentang dataset yang sama (365 hari observasi di Kecamatan Warudoyong), terdapat perbedaan halus namun signifikan pada fitur-fitur kompleks:
+   * **Entropi Sinyal (`entropy`):** Nilai entropi $\text{NO}_2$ pada hasil interpolasi polinomial ($0.996792$) terhitung lebih tinggi dibanding linier ($0.981357$). Hal ini mengindikasikan bahwa interpolasi polinomial mempertahankan variabilitas dan kekayaan spektrum informasi mikro fluktuasi polutan udara secara lebih dinamis daripada garis lurus linier yang cenderung memotong variasi lokal.
+   * **Dimensi Fraktal Higuchi (`higuchi_fractal_dimension`):** Pada polinomial bernilai $1.559565$, sedikit lebih tinggi dibandingkan linier ($1.559069$), mencerminkan kompleksitas kurvatur sinyal yang lebih representatif terhadap kondisi dispersi meteorologis riil di atmosfer Warudoyong.
+   * **Varians dan Energi Rata-Rata:** Perbedaan desimal presisi tinggi pada `calc_var` dan `abs_energy` memperlihatkan bahwa kurvatur pengisian celah data kosong secara polinomial memberikan bobot energi sinyal yang sedikit berbeda pada integrasi area bawah kurva (`auc`).
+
+3. **Evaluasi dan Kesimpulan: Mana Hasil yang Lebih Baik?**
+   
+   Berdasarkan tinjauan dinamika atmosferik, stabilitas statistik, serta kualitas fitur yang diekstraksi, **pendekatan Interpolasi Polinomial dinilai LEBIH BAIK dan LEBIH OPTIMAL** dibandingkan Interpolasi Linier untuk analisis kualitas udara Kecamatan Warudoyong. Berikut faktor-faktor penentunya:
+
+   * **Kesesuaian dengan Dinamika Alami Polutan Atmosfer:**
+     Penyebaran gas polutan di udara bersifat dinamis, fluida, dan non-linier akibat pengaruh hembusan angin, suhu, radiasi matahari, dan kelembapan. Interpolasi polinomial mampu merekonstruksi transisi kurva konsentrasi gas secara mulus (*smooth curvature*), sedangkan interpolasi linier menghasilkan patahan garis lurus kaku yang kurang realistis dalam mendeskripsikan fenomena meteorologi.
+   
+   * **Preservasi Entropi dan Variabilitas Informasi:**
+     Tingkat entropi sinyal yang lebih tinggi pada metode polinomial ($0.996792$ vs $0.981357$) membuktikan bahwa variasi fluktuasi konsentrasi polutan tidak tereduksi secara berlebihan (*no oversmoothing*), sehingga model analisis mempertahankan sensitivitas terhadap pola pencemaran udara ekstrem harian.
+   
+   * **Bebas dari Efek Penumpukan Batas (*Boundary Artifacts*):**
+     Skema eliminasi outlier pada metode linier melakukan pemotongan paksa (*hard clipping*) pada nilai batas kuartil, yang dapat menyebabkan penumpukan nilai identik di sekitar *threshold*. Sebaliknya, metode polinomial menggunakan *re-imputation* rekursif yang mengisi nilai anomali berdasarkan proyeksi kurva tetangga, sehingga distribusi data tetap kontinu dan alami.
+
+| Kriteria Evaluasi | Interpolasi Linier | Interpolasi Polinomial | Hasil Terbaik |
+| :--- | :--- | :--- | :---: |
+| **Bentuk Transisi Kurva** | Patah / garis lurus bersekat | Kurva lengkung mulus (*smooth*) | **Polinomial** |
+| **Mekanisme Outlier** | *Clipping* paksa ke batas IQR | Re-imputasi rekursif dinamis | **Polinomial** |
+| **Entropi Sinyal ($\text{NO}_2$)** | $0.981357$ (variasi sedikit tertekan) | **$0.996792$** (variabilitas terjaga kaya) | **Polinomial** |
+| **Dimensi Fraktal Higuchi** | $1.559069$ | **$1.559565$** (kompleksitas sinyal alamiah) | **Polinomial** |
+| **Efek Samping Nilai Batas** | Terjadi efek plafon/lantai (*ceiling/floor*) | Distribusi nilai tetap organik | **Polinomial** |
+| **Beban Komputasi** | Sangat ringan | Sedikit lebih tinggi (iteratif rekursif) | **Linier** |
+| **Kesimpulan Rekomendasi** | Cukup untuk komputasi cepat | **Terbaik untuk pemodelan Machine Learning & Clustering** | **Polinomial** |
+
+Kedua berkas hasil ekstraksi fitur, yaitu `Warudoyong_linier.csv` dan `Warudoyong_Polynomial.csv` (masing-masing 204 fitur), kini siap digunakan sebagai matriks masukan (*feature matrix*) untuk tahapan reduksi dimensi (PCA) dan klasterisasi kualitas udara (**K-Means Clustering**), dengan **`Warudoyong_Polynomial.csv`** menjadi rekomendasi utama untuk performa pengelompokan yang paling representatif.
+
