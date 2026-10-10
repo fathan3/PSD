@@ -18,4 +18,15 @@ chapters:
   - file: Preprocessing_dan_Ekstraksi_Fitur_Polinomial_warudoyong
   - file: K_Means_Clustering
   - file: K_Means_Clustering_Polinomial
+- file: tutupan_lahan_jawa_timur
+  sections:
+  - file: Bussines_Understanding_jatim
+  - file: Data_Understanding_jatim
+  - file: Data_Preparation_jatim
+  - file: Modeling_jatim
+  - file: Evaluation_jatim
+  - file: Deployment_Visualisasi_jatim
+  - file: Kesimpulan_Rekomendasi_jatim
+  - file: Panduan_Deploy_Streamlit
+
 

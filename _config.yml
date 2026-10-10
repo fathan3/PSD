@@ -30,3 +30,10 @@ repository:
 html:
   use_issues_button: true
   use_repository_button: true
+
+sphinx:
+  config:
+    html_extra_path:
+      - "peta_evaluasi_poligon_fuzzy.html"
+      - "peta_regional_jawatimur_fuzzy.html"
+
