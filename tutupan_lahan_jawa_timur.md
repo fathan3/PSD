@@ -5,7 +5,7 @@
 Dokumentasi ini menyajikan implementasi lengkap proyek pemodelan spasial klasifikasi penutup lahan (*Land Use and Land Cover* - LULC) skala regional untuk Provinsi Jawa Timur.
 
 ### Ringkasan Eksekutif & Metadata Proyek
-* **Mata Kuliah:** Penambangan Data Spasial (PSD) / Proyek Sains Data Spasial
+* **Mata Kuliah:** Proyek Sains Data
 * **Topik Utama:** Klasifikasi Spasial Tutupan Lahan (*Land Use and Land Cover* - LULC) Skala Regional
 * **Wilayah Studi:** Provinsi Jawa Timur, Indonesia
 * **Kerangka Kerja (Framework):** **CRISP-DM (Cross-Industry Standard Process for Data Mining)**
