@@ -89,7 +89,7 @@ Sebelum mempublikasikan aplikasi ke lingkungan produksi, seluruh file struktur p
 | **Dependensi** | `requirements.txt` | Daftar pustaka Python yang wajib diinstal otomatis oleh peladen Streamlit Cloud. |
 | **Konfigurasi Tema** | `.streamlit/config.toml` | Konfigurasi palet warna visual bawaan sistem (Cobalt Blue theme). |
 | **Peta Interaktif 1** | `peta_evaluasi_poligon_fuzzy.html` | Berkas peta mandiri evaluasi poligon ground truth dan derajat keanggotaan. |
-| **Peta Interaktif 2** | `peta_regional_jawatimur_fuzzy.html`| Berkas peta mandiri sebaran regional 300 titik observasi Jawa Timur di atas citra satelit. |
+| **Peta Interaktif 2** | `peta_regional_jawatimur_fuzzy.html`| Berkas peta mandiri klasifikasi spasial tutupan lahan regional (*ImageOverlay* raster hasil inferensi *Fuzzy Logic*) beserta titik observasi di atas citra satelit Esri & Google. |
 | **Batas Administrasi**| `jawa_timur_provinsi.geojson` | Data batas wilayah geografis batas administrasi Provinsi Jawa Timur. |
 | **Dataset Evaluasi** | `hasil_evaluasi/evaluasi_tutupan_lahan_fuzzy.csv` | Tabel data komprehensif berisi koordinat, kelas aktual, prediksi, dan skor keyakinan $\mu$. |
 
@@ -127,13 +127,13 @@ display(df_audit)
 ```text
 === TABEL AUDIT KELENGKAPAN ASET STREAMLIT ===
              Kategori                                       File Path    Status  Ukuran (KB)
-0      Aplikasi Utama                                          app.py  Tersedia        29.17
-1          Dependensi                                requirements.txt  Tersedia         0.09
-2      Tema Streamlit                          .streamlit/config.toml  Tersedia         0.18
-3    Peta 1 (Poligon)                peta_evaluasi_poligon_fuzzy.html  Tersedia       268.42
-4   Peta 2 (Regional)              peta_regional_jawatimur_fuzzy.html  Tersedia       194.51
-5  Batas Administrasi                     jawa_timur_provinsi.geojson  Tersedia       120.35
-6    Dataset Evaluasi  hasil_evaluasi/evaluasi_tutupan_lahan_fuzzy.csv  Tersedia        18.64
+0      Aplikasi Utama                                          app.py  Tersedia        30.31
+1          Dependensi                                requirements.txt  Tersedia         0.10
+2      Tema Streamlit                          .streamlit/config.toml  Tersedia         0.21
+3    Peta 1 (Poligon)                peta_evaluasi_poligon_fuzzy.html  Tersedia      1311.43
+4   Peta 2 (Regional)              peta_regional_jawatimur_fuzzy.html  Tersedia       586.67
+5  Batas Administrasi                     jawa_timur_provinsi.geojson  Tersedia         8.60
+6    Dataset Evaluasi  hasil_evaluasi/evaluasi_tutupan_lahan_fuzzy.csv  Tersedia       589.81
 
 Status Kesiapan: Seluruh berkas siap dipublikasikan.
 ```
@@ -164,7 +164,7 @@ Aplikasi `app.py` memiliki total 668 baris kode terstruktur yang mengimplementas
    * **Perairan Terbuka:** `#08519c`
    * **Mangrove:** `#8c510a`
 4. **Struktur 4 Tab Utama Dasbor:**
-   * **Tab 1: Peta Geospasial Interaktif:** Pemilih mode antara Peta 1 (Studio Evaluasi Poligon) dan Peta 2 (Sebaran Regional Jawa Timur) dengan kontrol tinggi iframe responsif (720px) dan tombol pembuka layar penuh (*Full Window*).
+   * **Tab 1: Peta Geospasial Interaktif:** Pemilih mode antara Peta 1 (Studio Evaluasi Poligon Ground Truth) dan Peta 2 (Klasifikasi Regional Fuzzy ImageOverlay & Titik Validasi) dengan kontrol tinggi iframe responsif (720px) dan tombol pembuka layar penuh (*Full Window*).
    * **Tab 2: Analisis Statistik & Evaluasi:** Visualisasi metrik model (Akurasi 96.67%, Cohen's Kappa 0.9600), grafik boxplot distribusi spektral, scatterplot separabilitas 2D, dan diagram matriks kontinjensi.
    * **Tab 3: Simulator Inferensi Fuzzy Real-Time:** Slider interaktif untuk memasukkan 5 nilai reflektansi band (B02, B03, B04, B08, B11) secara bebas yang langsung menghitung derajat keanggotaan fuzzy $\mu$ ke dalam grafik radar polar (*spider chart*).
    * **Tab 4: Eksplorasi Data & Unduh Hasil:** Tabel filter berdasarkan Kabupaten/Kota dan kelas tutupan lahan dengan tombol unduh data format CSV.
@@ -223,7 +223,7 @@ Server Streamlit secara otomatis mengaktifkan endpoint:
 ### 5.3 Checklist Pengujian Fungsional Lokal (*Local QA Checklist*):
 1. [x] **Hero Banner & KPI Metrics:** Menampilkan metrik akurasi 96.7% dan 300 sampel poligon secara akurat.
 2. [x] **Sidebar Konsol Spasial:** Menampilkan 6 kelas tutupan lahan dengan kotak indikator warna yang tepat.
-3. [x] **Tab 1 (Peta):** Mampu berganti secara mulus antara Peta 1 (Poligon) dan Peta 2 (Sebaran Regional Satelit).
+3. [x] **Tab 1 (Peta):** Mampu berganti secara mulus antara Peta 1 (Poligon Evaluasi) dan Peta 2 (Klasifikasi Regional Satelit dengan Overlay Raster Fuzzy).
 4. [x] **Tab 2 (Analisis):** Grafik boxplot dan scatterplot termuat tanpa terjadi galat atau peringatan deprecation.
 5. [x] **Tab 3 (Simulator):** Slider spektral responsif dan radar chart polar bergerak dinamis secara real-time.
 6. [x] **Tab 4 (Eksplorasi):** Fitur pemfilteran Kabupaten/Kota memfilter tabel data dengan presisi tinggi.

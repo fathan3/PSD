@@ -1,0 +1,7 @@
+,Bangunan,Danau,Lahan Hijau,Mangrove,Perairan Terbuka,Sawah
+Bangunan,15,0,0,0,0,0
+Danau,0,13,0,0,2,0
+Lahan Hijau,0,0,15,0,0,0
+Mangrove,0,0,0,15,0,0
+Perairan Terbuka,0,0,0,0,15,0
+Sawah,0,0,0,1,0,14
