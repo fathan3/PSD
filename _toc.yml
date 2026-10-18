@@ -4,29 +4,27 @@
 format: jb-book
 root: profile
 chapters:
-- file: polutan
+- file: 01_polutan_sukabumi/polutan
   sections:
-  - file: Bussines_Understanding
-  - file: Data_Understanding
-  - file: statistika
-- file: polutan_warudoyong
+  - file: 01_polutan_sukabumi/Bussines_Understanding
+  - file: 01_polutan_sukabumi/Data_Understanding
+  - file: 01_polutan_sukabumi/statistika
+- file: 02_polutan_warudoyong/polutan_warudoyong
   sections:
-  - file: Bussines_Understanding_warudoyong
-  - file: Data_Understanding_warudoyong
-  - file: statistika_warudoyong
-  - file: Preprocessing_dan_Ekstraksi_Fitur_warudoyong
-  - file: Preprocessing_dan_Ekstraksi_Fitur_Polinomial_warudoyong
-  - file: K_Means_Clustering
-  - file: K_Means_Clustering_Polinomial
-- file: tutupan_lahan_jawa_timur
+  - file: 02_polutan_warudoyong/Bussines_Understanding_warudoyong
+  - file: 02_polutan_warudoyong/Data_Understanding_warudoyong
+  - file: 02_polutan_warudoyong/statistika_warudoyong
+  - file: 02_polutan_warudoyong/Preprocessing_dan_Ekstraksi_Fitur_warudoyong
+  - file: 02_polutan_warudoyong/Preprocessing_dan_Ekstraksi_Fitur_Polinomial_warudoyong
+  - file: 02_polutan_warudoyong/K_Means_Clustering
+  - file: 02_polutan_warudoyong/K_Means_Clustering_Polinomial
+- file: 03_tutupan_lahan_jatim/tutupan_lahan_jawa_timur
   sections:
-  - file: Bussines_Understanding_jatim
-  - file: Data_Understanding_jatim
-  - file: Data_Preparation_jatim
-  - file: Modeling_jatim
-  - file: Evaluation_jatim
-  - file: Deployment_Visualisasi_jatim
-  - file: Kesimpulan_Rekomendasi_jatim
-  - file: Panduan_Deploy_Streamlit
-
-
+  - file: 03_tutupan_lahan_jatim/Bussines_Understanding_jatim
+  - file: 03_tutupan_lahan_jatim/Data_Understanding_jatim
+  - file: 03_tutupan_lahan_jatim/Data_Preparation_jatim
+  - file: 03_tutupan_lahan_jatim/Modeling_jatim
+  - file: 03_tutupan_lahan_jatim/Evaluation_jatim
+  - file: 03_tutupan_lahan_jatim/Deployment_Visualisasi_jatim
+  - file: 03_tutupan_lahan_jatim/Kesimpulan_Rekomendasi_jatim
+  - file: 03_tutupan_lahan_jatim/Panduan_Deploy_Streamlit

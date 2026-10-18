@@ -77,7 +77,7 @@ Sebelum melakukan koneksi melalui *client* mana pun, kita membutuhkan rincian kr
    * **SSL mode:** `require`
 4. Apabila aplikasi *client* membutuhkan, pastikan Anda juga mengunduh *CA certificate* (Sertifikat SSL) yang tersedia.
 
-![png](statistik_files/aiven.png)
+![png](statistik-warudoyong-files/aiven.png)
 
 ---
 
@@ -94,7 +94,7 @@ Aplikasi pgAdmin 4 difungsikan untuk memverifikasi tabel dan data secara langsun
    * **Password:** Tempelkan kata sandi, lalu centang **Save password?** agar tidak perlu mengetik ulang nanti.
 4. Klik tombol **Save** untuk memulai koneksi ke server *cloud*.
 
-![png](statistik_files/pgadmin-connect.png)
+![png](statistik-warudoyong-files/pgadmin-connect.png)
 
 ---
 

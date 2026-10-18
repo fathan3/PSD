@@ -34,6 +34,9 @@ html:
 sphinx:
   config:
     html_extra_path:
-      - "peta_evaluasi_poligon_fuzzy.html"
-      - "peta_regional_jawatimur_fuzzy.html"
-
+      - "03_tutupan_lahan_jatim/peta_evaluasi_poligon.html"
+      - "03_tutupan_lahan_jatim/peta_regional_jawatimur.html"
+      - "03_tutupan_lahan_jatim/peta_klasifikasi_rf.html"
+      - "03_tutupan_lahan_jatim/hasil_klasifikasi_knn.html"
+      - "03_tutupan_lahan_jatim/peta_evaluasi_poligon_fuzzy.html"
+      - "03_tutupan_lahan_jatim/peta_regional_jawatimur_fuzzy.html"
