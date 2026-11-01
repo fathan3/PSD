@@ -28,3 +28,13 @@ chapters:
   - file: 03_tutupan_lahan_jatim/Deployment_Visualisasi_jatim
   - file: 03_tutupan_lahan_jatim/Kesimpulan_Rekomendasi_jatim
   - file: 03_tutupan_lahan_jatim/Panduan_Deploy_Streamlit
+- file: 04_deteksi_suara/klasifikasi_kebisingan_suara
+  sections:
+  - file: 04_deteksi_suara/Bussines_Understanding_suara
+  - file: 04_deteksi_suara/Data_Understanding_suara
+  - file: 04_deteksi_suara/Data_Preparation_suara
+  - file: 04_deteksi_suara/Feature_Selection_suara
+  - file: 04_deteksi_suara/Modeling_suara
+  - file: 04_deteksi_suara/Evaluation_suara
+  - file: 04_deteksi_suara/Deployment_Aplikasi_suara
+  - file: 04_deteksi_suara/Kesimpulan_Rekomendasi_suara
